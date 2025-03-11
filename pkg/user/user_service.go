@@ -15,8 +15,8 @@ type (
 	UserService interface {
 		RegisterUser(ctx context.Context, req domain.UserRegisterRequest) (domain.UserRegisterResponse, error)
 		Login(ctx context.Context, req domain.UserLoginRequest) (domain.UserLoginResponse, error)
-		UpdateProfile(ctx context.Context, req domain.UpdateUserRequest) error
-		UpdateEducation(ctx context.Context, req domain.UpdateUserEducationRequest, userID string) error
+		UpdateProfile(ctx context.Context, req domain.UpdateUserRequest, userid string) (domain.UpdateUserResponse, error)
+		UpdateEducation(ctx context.Context, req domain.UpdateUserEducationRequest, userID string) (domain.UpdateUserEducationResponse, error)
 	}
 
 	userService struct {
@@ -51,7 +51,7 @@ func (s *userService) RegisterUser(ctx context.Context, req domain.UserRegisterR
 		if err != nil {
 			return domain.UserRegisterResponse{}, domain.ErrUploadFile
 		}
-		profilePicture = s.awsS3.GetPublicLinkKey(objectKey)
+		profilePicture = s.awsS3.GetPublicLink(objectKey)
 	}
 
 	if req.Headline != nil {
@@ -60,7 +60,7 @@ func (s *userService) RegisterUser(ctx context.Context, req domain.UserRegisterR
 		if err != nil {
 			return domain.UserRegisterResponse{}, domain.ErrUploadFile
 		}
-		headline = s.awsS3.GetPublicLinkKey(objectKey)
+		headline = s.awsS3.GetPublicLink(objectKey)
 	}
 
 	user := entities.User{
@@ -111,19 +111,15 @@ func (s *userService) Login(ctx context.Context, req domain.UserLoginRequest) (d
 	}, nil
 }
 
-func (s *userService) UpdateProfile(ctx context.Context, req domain.UpdateUserRequest) error {
-	exist := s.userRepository.CheckUserByEmail(ctx, req.Email)
-	if !exist {
-		return domain.ErrUserNotFound
-	}
-	user, err := s.userRepository.GetUserByEmail(ctx, req.Email)
+func (s *userService) UpdateProfile(ctx context.Context, req domain.UpdateUserRequest, userid string) (domain.UpdateUserResponse, error) {
+	user, err := s.userRepository.GetUserByID(ctx, userid)
 	if err != nil {
-		return err
+		return domain.UpdateUserResponse{}, err
 	}
 	if req.Name != "" {
 		user.Name = req.Name
 	}
-	if req.Email != "" {
+	if req.NewEmail != "" {
 		user.Email = req.NewEmail
 	}
 	if req.About != "" {
@@ -138,33 +134,44 @@ func (s *userService) UpdateProfile(ctx context.Context, req domain.UpdateUserRe
 	allowedMimetype := []string{"image/jpeg", "image/png"}
 	if req.ProfilePicture != nil {
 
-		_, err := s.awsS3.UploadFile(user.ProfilePicture, req.ProfilePicture, "profile-picture", allowedMimetype...)
+		updatedKey, err := s.awsS3.UpdateFile(s.awsS3.GetObjectKeyFromLink(user.ProfilePicture), req.ProfilePicture, allowedMimetype...)
 		if err != nil {
-			return domain.ErrUploadFile
+			return domain.UpdateUserResponse{}, domain.ErrUploadFile
 		}
-
+		user.ProfilePicture = s.awsS3.GetPublicLink(updatedKey)
 	}
 
 	if req.Headline != nil {
-		_, err := s.awsS3.UploadFile(user.Headline, req.Headline, "headline", allowedMimetype...)
+		updatedKey, err := s.awsS3.UploadFile(s.awsS3.GetObjectKeyFromLink(user.Headline), req.Headline, "headline", allowedMimetype...)
 		if err != nil {
-			return domain.ErrUploadFile
+			return domain.UpdateUserResponse{}, domain.ErrUploadFile
 		}
+		user.Headline = s.awsS3.GetPublicLink(updatedKey)
 	}
 	if err := s.userRepository.UpdateProfile(ctx, user); err != nil {
-		return err
+		return domain.UpdateUserResponse{}, err
 	}
-	return nil
+	return domain.UpdateUserResponse{
+		Name:           user.Name,
+		Email:          user.Email,
+		About:          user.About,
+		Address:        user.Address,
+		CurrentTitle:   user.CurrentTitle,
+		ProfilePicture: user.ProfilePicture,
+		Headline:       user.Headline,
+	}, nil
 }
 
-func (s *userService) UpdateEducation(ctx context.Context, req domain.UpdateUserEducationRequest, userID string) error {
+func (s *userService) UpdateEducation(ctx context.Context, req domain.UpdateUserEducationRequest, userID string) (domain.UpdateUserEducationResponse, error) {
 	if exist := s.userRepository.CheckUserByID(ctx, userID); !exist {
-		return domain.ErrUserNotFound
+		return domain.UpdateUserEducationResponse{}, domain.ErrUserNotFound
 	}
+
 	userid, err := uuid.Parse(userID)
 	if err != nil {
-		return domain.ErrParseUUID
+		return domain.UpdateUserEducationResponse{}, domain.ErrParseUUID
 	}
+
 	education := entities.UserEducation{
 		ID:           uuid.New(),
 		UserID:       userid,
@@ -175,7 +182,13 @@ func (s *userService) UpdateEducation(ctx context.Context, req domain.UpdateUser
 	}
 
 	if err := s.userRepository.UpdateEducation(ctx, education); err != nil {
-		return domain.ErrUpdateEducation
+		return domain.UpdateUserEducationResponse{}, domain.ErrUpdateEducation
 	}
-	return nil
+	return domain.UpdateUserEducationResponse{
+		SchoolName:   education.SchoolName,
+		Degree:       education.Degree,
+		FieldOfStudy: education.FieldOfStudy,
+		Description:  education.Description,
+		GPA:          education.GPA,
+	}, nil
 }

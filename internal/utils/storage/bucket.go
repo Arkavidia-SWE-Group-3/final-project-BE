@@ -19,8 +19,8 @@ type (
 		UploadFile(filename string, f *multipart.FileHeader, foldername string, mv ...string) (string, error)
 		UpdateFile(objectKey string, f *multipart.FileHeader, mv ...string) (string, error)
 		DeleteFile(objectKey string) error
-		GetPublicLinkKey(objectKey string) string
 		GetObjectKeyFromLink(link string) string
+		GetPublicLink(objectKey string) string
 	}
 	awss3 struct {
 		client *s3.Client
@@ -104,12 +104,7 @@ func (a *awss3) UpdateFile(objectKey string, f *multipart.FileHeader, mv ...stri
 	if err != nil {
 		return "", err
 	}
-	defer func(file multipart.File) {
-		err := file.Close()
-		if err != nil {
-			return
-		}
-	}(file)
+	defer file.Close()
 
 	mimetype, err := GetMimetype(file)
 	if err != nil {
@@ -142,6 +137,7 @@ func (a *awss3) UpdateFile(objectKey string, f *multipart.FileHeader, mv ...stri
 
 	return objectKey, nil
 }
+
 func (a *awss3) DeleteFile(objectKey string) error {
 	_, err := a.client.DeleteObject(context.TODO(), &s3.DeleteObjectInput{
 		Bucket: aws.String(a.bucket),
@@ -152,10 +148,6 @@ func (a *awss3) DeleteFile(objectKey string) error {
 	}
 	return nil
 }
-func (a *awss3) GetPublicLinkKey(objectKey string) string {
-	publicURL := fmt.Sprintf("https://%s.s3.%s.amazonaws.com/%s", a.bucket, a.region, objectKey)
-	return publicURL
-}
 func (a *awss3) GetObjectKeyFromLink(link string) string {
 	pref := fmt.Sprintf("https://%s.s3.%s.amazonaws.com/", a.bucket, a.region)
 
@@ -165,6 +157,11 @@ func (a *awss3) GetObjectKeyFromLink(link string) string {
 
 	objectKey := strings.TrimPrefix(link, pref)
 	return objectKey
+}
+
+func (a *awss3) GetPublicLink(objectKey string) string {
+	publicURL := fmt.Sprintf("https://%s.s3.%s.amazonaws.com/%s", a.bucket, a.region, objectKey)
+	return publicURL
 }
 
 func GetMimetype(f multipart.File) (string, error) {

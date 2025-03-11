@@ -11,6 +11,7 @@ type (
 		RegisterUser(ctx context.Context, req entities.User) (entities.User, error)
 		CheckUserByEmail(ctx context.Context, email string) bool
 		GetUserByEmail(ctx context.Context, email string) (entities.User, error)
+		GetUserByID(ctx context.Context, userid string) (entities.User, error)
 		CheckUserByID(ctx context.Context, id string) bool
 		UpdateSubscriptionStatus(ctx context.Context, userID string) error
 		UpdateProfile(ctx context.Context, user entities.User) error
@@ -44,7 +45,7 @@ func (r *userRepository) CheckUserByEmail(ctx context.Context, email string) boo
 }
 func (r *userRepository) CheckUserByID(ctx context.Context, id string) bool {
 	var user entities.User
-	if err := r.db.WithContext(ctx).First(user, "id = ?", id).Error; err != nil {
+	if err := r.db.WithContext(ctx).First(&user, "id = ?", id).Error; err != nil {
 		return false
 	}
 	if user.ID.String() != id {
@@ -56,6 +57,14 @@ func (r *userRepository) CheckUserByID(ctx context.Context, id string) bool {
 func (r *userRepository) GetUserByEmail(ctx context.Context, email string) (entities.User, error) {
 	var user entities.User
 	if err := r.db.WithContext(ctx).First(&user, "email = ?", email).Error; err != nil {
+		return entities.User{}, err
+	}
+	return user, nil
+}
+
+func (r *userRepository) GetUserByID(ctx context.Context, userid string) (entities.User, error) {
+	var user entities.User
+	if err := r.db.WithContext(ctx).First(&user, "id = ?", userid).Error; err != nil {
 		return entities.User{}, err
 	}
 	return user, nil

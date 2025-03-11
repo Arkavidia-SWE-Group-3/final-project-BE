@@ -69,8 +69,7 @@ type (
 
 	UpdateUserRequest struct {
 		Name           string                `json:"name" form:"name"`
-		Email          string                `json:"email" form:"email" validate:"required,email"`
-		NewEmail       string                `json:"new_email" form:"new_email" validate:"email"`
+		NewEmail       string                `json:"new_email" form:"new_email"`
 		About          string                `json:"about" form:"about"`
 		Address        string                `json:"address" form:"address"`
 		CurrentTitle   string                `json:"current_title" form:"current_title"`
@@ -78,10 +77,29 @@ type (
 		Headline       *multipart.FileHeader `json:"headline" form:"headline"`
 	}
 
+	UpdateUserResponse struct {
+		Name           string `json:"name"`
+		Email          string `json:"email"`
+		About          string `json:"about"`
+		Address        string `json:"address"`
+		CurrentTitle   string `json:"current_title"`
+		ProfilePicture string `json:"profile_picture"`
+		Headline       string `json:"headline"`
+	}
+
 	UpdateUserEducationRequest struct {
 		SchoolName   string `json:"school_name" form:"school_name" validate:"required"`
 		Degree       string `json:"degree" form:"degree"`
 		FieldOfStudy string `json:"field_of_study" form:"field_of_study"`
 		Description  string `json:"description" form:"description"`
+		GPA          string `json:"gpa" form:"gpa"`
+	}
+
+	UpdateUserEducationResponse struct {
+		SchoolName   string `json:"school_name"`
+		Degree       string `json:"degree"`
+		FieldOfStudy string `json:"field_of_study"`
+		Description  string `json:"description"`
+		GPA          string `json:"gpa"`
 	}
 )
