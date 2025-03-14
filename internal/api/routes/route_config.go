@@ -4,6 +4,7 @@ import (
 	"Go-Starter-Template/internal/api/handlers"
 	"Go-Starter-Template/internal/middleware"
 	jwtService "Go-Starter-Template/pkg/jwt"
+
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -27,9 +28,31 @@ func (c *Config) User() {
 	{
 		user.Post("/register", c.UserHandler.RegisterUser)
 		user.Post("/login", c.UserHandler.Login)
+		user.Get("/profile/:slug", c.UserHandler.GetProfile)
 		user.Post("/update-profile", c.Middleware.AuthMiddleware(c.JwtService), c.UserHandler.UpdateProfile)
-		user.Post("/update-education", c.Middleware.AuthMiddleware(c.JwtService), c.UserHandler.UpdateEducation)
+
+		education := user.Group("/education")
+		{
+			education.Post("/add-education", c.Middleware.AuthMiddleware(c.JwtService), c.UserHandler.PostEducation)
+			education.Patch("/update-education", c.Middleware.AuthMiddleware(c.JwtService), c.UserHandler.UpdateEducation)
+			education.Delete("/delete-education/:id", c.Middleware.AuthMiddleware(c.JwtService), c.UserHandler.DeleteEducation)
+		}
+
+		experience := user.Group("/experience")
+		{
+			experience.Patch("/update-experience", c.Middleware.AuthMiddleware(c.JwtService), c.UserHandler.UpdateExperience)
+			experience.Post("/add-experience", c.Middleware.AuthMiddleware(c.JwtService), c.UserHandler.PostExperience)
+			experience.Delete("/delete-experience/:id", c.Middleware.AuthMiddleware(c.JwtService), c.UserHandler.DeleteExperience)
+		}
+
+		skills := user.Group("/skill")
+		{
+			skills.Post("/add-skill", c.Middleware.AuthMiddleware(c.JwtService), c.UserHandler.PostSkill)
+			skills.Delete("/delete-skill/:id", c.Middleware.AuthMiddleware(c.JwtService), c.UserHandler.DeleteSkill)
+		}
+
 		user.Post("/subscribe", c.Middleware.AuthMiddleware(c.JwtService), c.MidtransHandler.CreateTransaction)
+
 	}
 }
 
