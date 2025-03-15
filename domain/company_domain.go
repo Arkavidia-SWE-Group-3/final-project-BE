@@ -9,10 +9,12 @@ type (
 	}
 
 	CompanyInfoResponse struct {
-		ID       string `json:"id"`
-		Name     string `json:"name"`
-		About    string `json:"about"`
-		Industry string `json:"industry"`
+		ID             string `json:"id"`
+		Name           string `json:"name"`
+		About          string `json:"about"`
+		Industry       string `json:"industry"`
+		ProfilePicture string `json:"profile_picture"`
+		Headline       string `json:"headline"`
 	}
 
 	CompanyJobsResponse struct {
