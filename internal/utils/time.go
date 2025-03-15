@@ -12,5 +12,5 @@ func ConvertStringToTime(date string) time.Time {
 }
 
 func ConvertTimeToString(date time.Time) string {
-	return date.Format("2006-01-02")
+	return date.Format("01-02-2006")
 }

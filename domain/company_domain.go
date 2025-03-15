@@ -9,12 +9,12 @@ type (
 	}
 
 	CompanyInfoResponse struct {
-		ID             string `json:"id"`
-		Name           string `json:"name"`
-		About          string `json:"about"`
-		Industry       string `json:"industry"`
-		ProfilePicture string `json:"profile_picture"`
-		Headline       string `json:"headline"`
+		ID       string `json:"id"`
+		Name     string `json:"name"`
+		About    string `json:"about"`
+		Industry string `json:"industry"`
+		Logo     string `json:"logo"`
+		Headline string `json:"cover"`
 	}
 
 	CompanyJobsResponse struct {
@@ -23,12 +23,13 @@ type (
 		Location        string                     `json:"location"`
 		LocationType    string                     `json:"location_type"`
 		JobType         string                     `json:"job_type"`
-		ExperienceLevel string                     `json:"experience_level"`
+		ExperienceLevel string                     `json:"experience"`
 		SalaryMin       int                        `json:"salary_min"`
 		SalaryMax       int                        `json:"salary_max"`
 		Status          string                     `json:"status"`
 		Description     string                     `json:"description"`
 		Skills          []CompanyJobSkillsResponse `json:"skills"`
+		Posted          string                     `json:"posted"`
 	}
 
 	CompanyJobSkillsResponse struct {

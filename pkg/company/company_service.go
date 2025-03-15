@@ -2,6 +2,7 @@ package company
 
 import (
 	"Go-Starter-Template/domain"
+	"Go-Starter-Template/internal/utils"
 	"Go-Starter-Template/internal/utils/storage"
 	jwtService "Go-Starter-Template/pkg/jwt"
 	"context"
@@ -35,12 +36,12 @@ func (s *companyService) GetProfile(ctx context.Context, slug string) (*domain.C
 	}
 
 	companyInfoResponse := domain.CompanyInfoResponse{
-		ID:             company.ID.String(),
-		Name:           company.Name,
-		About:          company.About,
-		Industry:       company.Industry,
-		ProfilePicture: "",
-		Headline:       "",
+		ID:       company.ID.String(),
+		Name:     company.Name,
+		About:    company.About,
+		Industry: company.Industry,
+		Logo:     "",
+		Headline: "",
 	}
 
 	var companyJobsResponse []domain.CompanyJobsResponse
@@ -75,6 +76,7 @@ func (s *companyService) GetProfile(ctx context.Context, slug string) (*domain.C
 			Status:          job.Status,
 			Description:     job.Description,
 			Skills:          companyJobSkillsResponse,
+			Posted:          utils.ConvertTimeToString(job.CreatedAt),
 		})
 	}
 
