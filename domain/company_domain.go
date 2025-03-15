@@ -24,8 +24,8 @@ type (
 		LocationType    string                     `json:"location_type"`
 		JobType         string                     `json:"job_type"`
 		ExperienceLevel string                     `json:"experience"`
-		SalaryMin       int                        `json:"salary_min"`
-		SalaryMax       int                        `json:"salary_max"`
+		SalaryMin       int                        `json:"min_salary"`
+		SalaryMax       int                        `json:"max_salary"`
 		Status          string                     `json:"status"`
 		Description     string                     `json:"description"`
 		Skills          []CompanyJobSkillsResponse `json:"skills"`
