@@ -83,9 +83,10 @@ type (
 
 	CompanyUpdateProfileRequest struct {
 		CompanyID string                `json:"company_id" form:"company_id" validate:"required"`
-		Name      string                `json:"name"`
-		Industry  string                `json:"industry"`
+		Name      string                `json:"name" form:"name"`
+		Industry  string                `json:"industry" form:"industry"`
 		Logo      *multipart.FileHeader `json:"logo"`
 		Headline  *multipart.FileHeader `json:"cover"`
+		About     string                `json:"about" form:"about"`
 	}
 )

@@ -102,6 +102,7 @@ func (s *companyService) UpdateProfile(ctx context.Context, req domain.CompanyUp
 		ID:       uuid.MustParse(req.CompanyID),
 		Name:     req.Name,
 		Industry: req.Industry,
+		About:    req.About,
 	}
 
 	allowedMimetype := []string{"image/jpeg", "image/png"}
