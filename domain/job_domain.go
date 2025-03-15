@@ -1,9 +1,12 @@
 package domain
 
 var (
-	MessageFailedGetJobs = "Failed to get jobs"
+	MessageFailedGetJobs      = "Failed to get jobs"
+	MessageFailedSearchJobs   = "Failed to search jobs"
+	MessageFailedGetJobDetail = "Successfully get job detail"
 
-	MessageSuccessSearchJobs = "Successfully search jobs"
+	MessageSuccessSearchJobs   = "Successfully search jobs"
+	MessageSuccessGetJobDetail = "Successfully get job detail"
 )
 
 type (
@@ -22,7 +25,25 @@ type (
 		ID              string   `json:"id"`
 		CompanyName     string   `json:"company"`
 		CompanyLogo     string   `json:"logo"`
-		CompanySlug     string   `json:"slug"`
+		CompanySlug     string   `json:"company_slug"`
+		Title           string   `json:"title"`
+		Location        string   `json:"location"`
+		LocationType    string   `json:"location_type"`
+		JobType         string   `json:"type"`
+		ExperienceLevel string   `json:"experience"`
+		SalaryMin       int      `json:"min_salary"`
+		SalaryMax       int      `json:"max_salary"`
+		Description     string   `json:"description"`
+		Status          string   `json:"status"`
+		Posted          string   `json:"posted"`
+		Skills          []string `json:"skills"`
+	}
+
+	JobDetailResponse struct {
+		ID              string   `json:"id"`
+		CompanyName     string   `json:"company"`
+		CompanyLogo     string   `json:"logo"`
+		CompanySlug     string   `json:"company_slug"`
 		Title           string   `json:"title"`
 		Location        string   `json:"location"`
 		LocationType    string   `json:"location_type"`

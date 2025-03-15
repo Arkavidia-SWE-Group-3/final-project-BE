@@ -16,6 +16,7 @@ import (
 type (
 	JobHandler interface {
 		SearchJob(c *fiber.Ctx) error
+		GetJobDetail(c *fiber.Ctx) error
 	}
 	jobHandler struct {
 		JobService job.JobService
@@ -28,6 +29,18 @@ func NewJobHandler(jobService job.JobService, validator *validator.Validate) Job
 		JobService: jobService,
 		Validator:  validator,
 	}
+}
+
+func (h *jobHandler) GetJobDetail(c *fiber.Ctx) error {
+	id := c.Params("id")
+
+	res, err := h.JobService.GetJobDetail(c.Context(), id)
+
+	if err != nil {
+		return presenters.ErrorResponse(c, fiber.StatusBadRequest, domain.MessageFailedGetJobDetail, err)
+	}
+
+	return presenters.SuccessResponse(c, res, fiber.StatusOK, domain.MessageSuccessGetJobDetail)
 }
 
 func (h *jobHandler) SearchJob(c *fiber.Ctx) error {

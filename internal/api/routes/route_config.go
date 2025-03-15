@@ -74,7 +74,7 @@ func (c *Config) Company() {
 func (c *Config) Job() {
 	job := c.App.Group("/api/job")
 	{
-		// job.Get("/detail/:slug", c.JobHandler.GetJobDetail)
+		job.Get("/detail/:id", c.JobHandler.GetJobDetail)
 		job.Get("/search", c.JobHandler.SearchJob)
 	}
 }

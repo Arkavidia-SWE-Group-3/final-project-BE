@@ -11,6 +11,7 @@ import (
 type (
 	JobRepository interface {
 		SearchJob(ctx context.Context, filters domain.JobSearchRequest) ([]entities.Job, error)
+		GetJobDetail(ctx context.Context, id string) (entities.Job, error)
 	}
 	jobRepository struct {
 		db *gorm.DB
@@ -19,6 +20,17 @@ type (
 
 func NewJobRepository(db *gorm.DB) JobRepository {
 	return &jobRepository{db: db}
+}
+
+func (r *jobRepository) GetJobDetail(ctx context.Context, id string) (entities.Job, error) {
+	var job entities.Job
+	err := r.db.WithContext(ctx).Preload("Company").Preload("Skills").Where("id = ?", id).First(&job).Error
+
+	if err != nil {
+		return entities.Job{}, err
+	}
+
+	return job, nil
 }
 
 func (r *jobRepository) SearchJob(ctx context.Context, filters domain.JobSearchRequest) ([]entities.Job, error) {
