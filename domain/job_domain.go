@@ -22,6 +22,7 @@ type (
 		ID              string   `json:"id"`
 		CompanyName     string   `json:"company"`
 		CompanyLogo     string   `json:"logo"`
+		CompanySlug     string   `json:"slug"`
 		Title           string   `json:"title"`
 		Location        string   `json:"location"`
 		LocationType    string   `json:"location_type"`

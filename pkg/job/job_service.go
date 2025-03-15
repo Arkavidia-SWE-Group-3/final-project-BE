@@ -47,6 +47,7 @@ func (s *jobService) SearchJob(ctx context.Context, jobFilters domain.JobSearchR
 		jobSearchResponse = append(jobSearchResponse, domain.JobSearchResponse{
 			ID:              job.ID.String(),
 			CompanyName:     job.Company.Name,
+			CompanySlug:     job.Company.Slug,
 			CompanyLogo:     "",
 			Title:           job.Title,
 			Location:        job.Location,
