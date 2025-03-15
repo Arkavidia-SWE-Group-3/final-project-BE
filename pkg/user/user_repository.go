@@ -3,6 +3,7 @@ package user
 import (
 	"Go-Starter-Template/domain"
 	"Go-Starter-Template/entities"
+	"Go-Starter-Template/internal/utils"
 	"context"
 
 	"github.com/google/uuid"
@@ -116,8 +117,8 @@ func (r *userRepository) GetProfile(ctx context.Context, slug string) (domain.Us
 			Degree:       edu.Degree,
 			FieldOfStudy: edu.FieldOfStudy,
 			Description:  edu.Description,
-			StartDate:    edu.StartedAt.Format("01-02-2006"),
-			EndDate:      edu.EndedAt.Format("01-02-2006"),
+			StartDate:    utils.ConvertTimeToString(edu.StartedAt),
+			EndDate:      utils.ConvertTimeToString(edu.EndedAt),
 		}
 	}
 
@@ -129,8 +130,8 @@ func (r *userRepository) GetProfile(ctx context.Context, slug string) (domain.Us
 			CompanyID:   exp.CompanyID.String(),
 			CompanyName: exp.Company.Name,
 			Location:    exp.Location,
-			StartDate:   exp.StartedAt.Format("01-02-2006"),
-			EndDate:     exp.EndedAt.Format("01-02-2006"),
+			StartDate:   utils.ConvertTimeToString(exp.StartedAt),
+			EndDate:     utils.ConvertTimeToString(exp.EndedAt),
 			Description: exp.Description,
 		}
 	}
