@@ -11,6 +11,7 @@ import (
 type Config struct {
 	App             *fiber.App
 	UserHandler     handlers.UserHandler
+	CompanyHandler  handlers.CompanyHandler
 	MidtransHandler handlers.MidtransHandler
 	Middleware      middleware.Middleware
 	JwtService      jwtService.JWTService
@@ -19,6 +20,7 @@ type Config struct {
 func (c *Config) Setup() {
 	c.App.Use(c.Middleware.CORSMiddleware())
 	c.User()
+	c.Company()
 	c.GuestRoute()
 	c.AuthRoute()
 }
@@ -53,6 +55,14 @@ func (c *Config) User() {
 
 		user.Post("/subscribe", c.Middleware.AuthMiddleware(c.JwtService), c.MidtransHandler.CreateTransaction)
 
+	}
+
+}
+
+func (c *Config) Company() {
+	company := c.App.Group("/api/company")
+	{
+		company.Get("/profile/:slug", c.CompanyHandler.GetProfile)
 	}
 }
 

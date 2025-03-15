@@ -6,15 +6,17 @@ import (
 	"Go-Starter-Template/internal/middleware"
 	"Go-Starter-Template/internal/utils"
 	"Go-Starter-Template/internal/utils/storage"
+	"Go-Starter-Template/pkg/company"
 	"Go-Starter-Template/pkg/jwt"
 	"Go-Starter-Template/pkg/midtrans"
 	"Go-Starter-Template/pkg/user"
+	"os"
+	"path/filepath"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/log"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"gorm.io/gorm"
-	"os"
-	"path/filepath"
 )
 
 func NewApp(db *gorm.DB) (*fiber.App, error) {
@@ -53,10 +55,12 @@ func NewApp(db *gorm.DB) (*fiber.App, error) {
 
 	// Repository
 	userRepository := user.NewUserRepository(db)
+	companyRepository := company.NewCompanyRepository(db)
 	midtransRepository := midtrans.NewMidtransRepository(db)
 
 	// Service
 	userService := user.NewUserService(userRepository, awsS3, jwtService)
+	companyService := company.NewCompanyService(companyRepository, awsS3, jwtService)
 	midtransService := midtrans.NewMidtransService(
 		midtransRepository,
 		userRepository,
@@ -64,12 +68,14 @@ func NewApp(db *gorm.DB) (*fiber.App, error) {
 
 	// Handler
 	userHandler := handlers.NewUserHandler(userService, validator)
+	companyHandler := handlers.NewCompanyHandler(companyService, validator)
 	midtransHandler := handlers.NewMidtransHandler(midtransService, validator)
 
 	// routes
 	routesConfig := routes.Config{
 		App:             app,
 		UserHandler:     userHandler,
+		CompanyHandler:  companyHandler,
 		MidtransHandler: midtransHandler,
 		Middleware:      middlewares,
 		JwtService:      jwtService,

@@ -3,7 +3,7 @@ package entities
 import "github.com/google/uuid"
 
 type Job struct {
-	ID              uuid.UUID `gorm:"type:uuid;primary_key;not null" json:"id"`
+	ID              uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primary_key;not null" json:"id"`
 	CompanyID       uuid.UUID `json:"company_id"`
 	Title           string    `json:"title"`
 	Description     string    `json:"description"`
