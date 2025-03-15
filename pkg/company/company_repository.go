@@ -13,6 +13,10 @@ type (
 		GetBySlug(ctx context.Context, slug string) (entities.Companies, error)
 		GetJobsByCompanyID(ctx context.Context, companyID uuid.UUID) ([]entities.Job, error)
 		GetJobSkillsByJobID(ctx context.Context, jobID uuid.UUID) ([]entities.JobSkill, error)
+		AddJob(ctx context.Context, job entities.Job) uuid.UUID
+		AddJobSkill(ctx context.Context, jobSkill entities.JobSkill) error
+		UpdateJob(ctx context.Context, job entities.Job) error
+		DeleteJobSkillsByJobID(ctx context.Context, jobID uuid.UUID) error
 	}
 	companyRepository struct {
 		db *gorm.DB
@@ -49,4 +53,37 @@ func (r *companyRepository) GetJobSkillsByJobID(ctx context.Context, jobID uuid.
 	}
 
 	return jobSkill, nil
+}
+
+func (r *companyRepository) AddJob(ctx context.Context, job entities.Job) uuid.UUID {
+	var jobID uuid.UUID
+
+	if err := r.db.WithContext(ctx).Create(&job).Error; err != nil {
+		return jobID
+	}
+
+	jobID = job.ID
+	return jobID
+
+}
+
+func (r *companyRepository) AddJobSkill(ctx context.Context, jobSkill entities.JobSkill) error {
+	if err := r.db.WithContext(ctx).Create(&jobSkill).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *companyRepository) UpdateJob(ctx context.Context, job entities.Job) error {
+	if err := r.db.WithContext(ctx).Model(&job).Updates(&job).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *companyRepository) DeleteJobSkillsByJobID(ctx context.Context, jobID uuid.UUID) error {
+	if err := r.db.WithContext(ctx).Where("job_id = ?", jobID).Delete(&entities.JobSkill{}).Error; err != nil {
+		return err
+	}
+	return nil
 }

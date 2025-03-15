@@ -2,15 +2,20 @@ package company
 
 import (
 	"Go-Starter-Template/domain"
+	"Go-Starter-Template/entities"
 	"Go-Starter-Template/internal/utils"
 	"Go-Starter-Template/internal/utils/storage"
 	jwtService "Go-Starter-Template/pkg/jwt"
 	"context"
+
+	"github.com/google/uuid"
 )
 
 type (
 	CompanyService interface {
 		GetProfile(ctx context.Context, slug string) (*domain.CompanyProfileResponse, error)
+		AddJob(ctx context.Context, companyID string, req domain.CompanyAddJobRequest) error
+		UpdateJob(ctx context.Context, companyID string, req domain.CompanyUpdateJobRequest) error
 	}
 
 	companyService struct {
@@ -89,4 +94,83 @@ func (s *companyService) GetProfile(ctx context.Context, slug string) (*domain.C
 		CompanyInfo: companyInfoResponse,
 		ComapnyJobs: companyJobsResponse,
 	}, nil
+}
+
+func (s *companyService) AddJob(ctx context.Context, companyID string, req domain.CompanyAddJobRequest) error {
+
+	job := entities.Job{
+		CompanyID:       uuid.MustParse(companyID),
+		Title:           req.Title,
+		Location:        req.Location,
+		LocationType:    req.LocationType,
+		JobType:         req.JobType,
+		ExperienceLevel: req.ExperienceLevel,
+		SalaryMin:       req.SalaryMin,
+		SalaryMax:       req.SalaryMax,
+		Description:     req.Description,
+		Status:          "active",
+	}
+
+	jobID := s.companyRepository.AddJob(ctx, job)
+
+	if jobID == uuid.Nil {
+		return domain.ErrJobNotCreated
+	}
+
+	for _, skillID := range req.Skills {
+		jobSkill := entities.JobSkill{
+			JobID:   jobID,
+			SkillID: uuid.MustParse(skillID),
+		}
+
+		err := s.companyRepository.AddJobSkill(ctx, jobSkill)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (s *companyService) UpdateJob(ctx context.Context, companyID string, req domain.CompanyUpdateJobRequest) error {
+
+	job := entities.Job{
+		ID:              uuid.MustParse(req.JobID),
+		CompanyID:       uuid.MustParse(companyID),
+		Title:           req.Title,
+		Location:        req.Location,
+		LocationType:    req.LocationType,
+		JobType:         req.JobType,
+		ExperienceLevel: req.ExperienceLevel,
+		SalaryMin:       req.SalaryMin,
+		SalaryMax:       req.SalaryMax,
+		Description:     req.Description,
+		Status:          "active",
+	}
+
+	err := s.companyRepository.UpdateJob(ctx, job)
+
+	if err != nil {
+		return domain.ErrJobNotUpdated
+	}
+
+	err = s.companyRepository.DeleteJobSkillsByJobID(ctx, job.ID)
+
+	if err != nil {
+		return err
+	}
+
+	for _, skillID := range req.Skills {
+		jobSkill := entities.JobSkill{
+			JobID:   job.ID,
+			SkillID: uuid.MustParse(skillID),
+		}
+
+		err := s.companyRepository.AddJobSkill(ctx, jobSkill)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

@@ -1,6 +1,17 @@
 package domain
 
-var ()
+import (
+	"errors"
+)
+
+var (
+	MessageSuccessAddJob = "Job added successfully"
+
+	MessageFailedAddJob = "Failed to add job"
+
+	ErrJobNotCreated = errors.New("job not created")
+	ErrJobNotUpdated = errors.New("job not updated")
+)
 
 type (
 	CompanyProfileResponse struct {
@@ -36,5 +47,33 @@ type (
 		ID      string `json:"id"`
 		SkillID string `json:"skill_id"`
 		Name    string `json:"name"`
+	}
+
+	CompanyAddJobRequest struct {
+		CompanyID       string `json:"company_id"`
+		Title           string `json:"title"`
+		Location        string `json:"location"`
+		LocationType    string `json:"location_type"`
+		JobType         string `json:"job_type"`
+		ExperienceLevel string `json:"experience"`
+		SalaryMin       int    `json:"min_salary"`
+		SalaryMax       int    `json:"max_salary"`
+		Description     string `json:"description"`
+		Skills          []string
+		Status          string `json:"status"`
+	}
+
+	CompanyUpdateJobRequest struct {
+		CompanyID       string `json:"company_id"`
+		JobID           string `json:"job_id"`
+		Title           string `json:"title"`
+		Location        string `json:"location"`
+		LocationType    string `json:"location_type"`
+		JobType         string `json:"job_type"`
+		ExperienceLevel string `json:"experience"`
+		SalaryMin       int    `json:"min_salary"`
+		SalaryMax       int    `json:"max_salary"`
+		Description     string `json:"description"`
+		Skills          []string
 	}
 )
