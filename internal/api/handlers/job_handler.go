@@ -18,6 +18,7 @@ type (
 		SearchJob(c *fiber.Ctx) error
 		GetJobDetail(c *fiber.Ctx) error
 		ApplyJob(c *fiber.Ctx) error
+		GetApplicants(c *fiber.Ctx) error
 	}
 	jobHandler struct {
 		JobService job.JobService
@@ -110,4 +111,18 @@ func (h *jobHandler) ApplyJob(c *fiber.Ctx) error {
 	}
 
 	return presenters.SuccessResponse(c, nil, fiber.StatusOK, domain.MessageSuccessApplyJob)
+}
+
+func (h *jobHandler) GetApplicants(c *fiber.Ctx) error {
+	jobID := c.Params("id")
+
+	userID := c.Locals("user_id").(string)
+
+	res, err := h.JobService.GetApplicants(c.Context(), jobID, userID)
+
+	if err != nil {
+		return presenters.ErrorResponse(c, fiber.StatusBadRequest, domain.MessageFailedGetApplicants, err)
+	}
+
+	return presenters.SuccessResponse(c, res, fiber.StatusOK, domain.MessageSuccessGetApplicants)
 }

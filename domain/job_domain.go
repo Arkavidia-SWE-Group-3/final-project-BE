@@ -3,14 +3,16 @@ package domain
 import "mime/multipart"
 
 var (
-	MessageFailedGetJobs      = "Failed to get jobs"
-	MessageFailedSearchJobs   = "Failed to search jobs"
-	MessageFailedGetJobDetail = "Successfully get job detail"
-	MessageFailedApplyJob     = "Failed to apply job"
+	MessageFailedGetJobs       = "Failed to get jobs"
+	MessageFailedSearchJobs    = "Failed to search jobs"
+	MessageFailedGetJobDetail  = "Successfully get job detail"
+	MessageFailedApplyJob      = "Failed to apply job"
+	MessageFailedGetApplicants = "Failed to get applicants"
 
-	MessageSuccessSearchJobs   = "Successfully search jobs"
-	MessageSuccessGetJobDetail = "Successfully get job detail"
-	MessageSuccessApplyJob     = "Successfully apply job"
+	MessageSuccessSearchJobs    = "Successfully search jobs"
+	MessageSuccessGetJobDetail  = "Successfully get job detail"
+	MessageSuccessApplyJob      = "Successfully apply job"
+	MessageSuccessGetApplicants = "Successfully get applicants"
 )
 
 type (
@@ -64,5 +66,17 @@ type (
 		Status          string   `json:"status"`
 		Posted          string   `json:"posted"`
 		Skills          []string `json:"skills"`
+	}
+
+	JobApplicantResponse struct {
+		ID                 string `json:"id"`
+		UserID             string `json:"user_id"`
+		UserName           string `json:"name"`
+		UserSlug           string `json:"slug"`
+		UserProfilePicture string `json:"profile_picture"`
+		UserHeadline       string `json:"headline"`
+		ResumeURL          string `json:"resume_url"`
+		Status             string `json:"status"`
+		AppliedAt          string `json:"applied_at"`
 	}
 )

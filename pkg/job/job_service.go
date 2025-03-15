@@ -16,6 +16,7 @@ type (
 		SearchJob(ctx context.Context, jobFilters domain.JobSearchRequest) ([]domain.JobSearchResponse, error)
 		GetJobDetail(ctx context.Context, id string) (domain.JobDetailResponse, error)
 		ApplyJob(ctx context.Context, req domain.JobApplyRequest, userID string) error
+		GetApplicants(ctx context.Context, jobID string, userID string) ([]domain.JobApplicantResponse, error)
 	}
 
 	jobService struct {
@@ -154,4 +155,40 @@ func (s *jobService) ApplyJob(ctx context.Context, req domain.JobApplyRequest, u
 	}
 
 	return nil
+}
+
+func (s *jobService) GetApplicants(ctx context.Context, jobID string, userID string) ([]domain.JobApplicantResponse, error) {
+	parsedJobID, err := uuid.Parse(jobID)
+
+	if err != nil {
+		return nil, domain.ErrParseUUID
+	}
+
+	res, err := s.jobRepository.GetApplicants(ctx, parsedJobID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var jobApplicants []domain.JobApplicantResponse
+
+	for _, applicant := range res {
+		jobApplicants = append(jobApplicants, domain.JobApplicantResponse{
+			ID:                 applicant.ID.String(),
+			UserID:             applicant.User.ID.String(),
+			UserName:           applicant.User.Name,
+			UserSlug:           applicant.User.Slug,
+			UserProfilePicture: applicant.User.ProfilePicture,
+			UserHeadline:       applicant.User.CurrentTitle,
+			ResumeURL:          applicant.CV,
+			Status:             applicant.Status,
+			AppliedAt:          utils.ConvertTimeToString(applicant.CreatedAt),
+		})
+	}
+
+	if jobApplicants == nil {
+		jobApplicants = []domain.JobApplicantResponse{}
+	}
+
+	return jobApplicants, nil
 }

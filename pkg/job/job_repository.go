@@ -5,6 +5,7 @@ import (
 	"Go-Starter-Template/entities"
 	"context"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -13,6 +14,7 @@ type (
 		SearchJob(ctx context.Context, filters domain.JobSearchRequest) ([]entities.Job, error)
 		GetJobDetail(ctx context.Context, id string) (entities.Job, error)
 		ApplyJob(ctx context.Context, jobApplication entities.JobApplication) error
+		GetApplicants(ctx context.Context, jobID uuid.UUID) ([]entities.JobApplication, error)
 	}
 	jobRepository struct {
 		db *gorm.DB
@@ -94,4 +96,15 @@ func (r *jobRepository) ApplyJob(ctx context.Context, jobApplication entities.Jo
 	}
 
 	return nil
+}
+
+func (r *jobRepository) GetApplicants(ctx context.Context, jobID uuid.UUID) ([]entities.JobApplication, error) {
+	var applicants []entities.JobApplication
+	err := r.db.WithContext(ctx).Preload("User").Where("job_id = ?", jobID).Find(&applicants).Error
+
+	if err != nil {
+		return []entities.JobApplication{}, err
+	}
+
+	return applicants, nil
 }
