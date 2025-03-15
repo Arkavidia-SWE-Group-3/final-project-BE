@@ -35,9 +35,10 @@ func (s *companyService) GetProfile(ctx context.Context, slug string) (*domain.C
 	}
 
 	companyInfoResponse := domain.CompanyInfoResponse{
-		ID:    company.ID.String(),
-		Name:  company.Name,
-		About: company.About,
+		ID:       company.ID.String(),
+		Name:     company.Name,
+		About:    company.About,
+		Industry: company.Industry,
 	}
 
 	var companyJobsResponse []domain.CompanyJobsResponse
