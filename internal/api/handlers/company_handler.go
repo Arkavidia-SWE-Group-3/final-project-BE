@@ -17,6 +17,7 @@ type (
 		GetProfile(c *fiber.Ctx) error
 		AddJob(c *fiber.Ctx) error
 		UpdateJob(c *fiber.Ctx) error
+		UpdateProfile(c *fiber.Ctx) error
 	}
 	companyHandler struct {
 		CompanyService company.CompanyService
@@ -81,4 +82,27 @@ func (h *companyHandler) UpdateJob(c *fiber.Ctx) error {
 	}
 
 	return presenters.SuccessResponse(c, nil, fiber.StatusCreated, domain.MessageSuccessAddJob)
+}
+
+func (h *companyHandler) UpdateProfile(c *fiber.Ctx) error {
+	var req domain.CompanyUpdateProfileRequest
+
+	if err := c.BodyParser(&req); err != nil {
+		return presenters.ErrorResponse(c, fiber.StatusBadRequest, domain.MessageFailedUpdateProfileCompany, err)
+	}
+
+	if err := h.Validator.Struct(req); err != nil {
+		return presenters.ErrorResponse(c, fiber.StatusBadRequest, domain.MessageFailedUpdateProfileCompany, err)
+	}
+
+	req.Logo, _ = c.FormFile("logo")
+	req.Headline, _ = c.FormFile("headline")
+
+	err := h.CompanyService.UpdateProfile(c.Context(), req)
+
+	if err != nil {
+		return presenters.ErrorResponse(c, fiber.StatusBadRequest, domain.MessageFailedUpdateProfileCompany, err)
+	}
+
+	return presenters.SuccessResponse(c, nil, fiber.StatusCreated, domain.MessageSuccessUpdateProfileCompany)
 }

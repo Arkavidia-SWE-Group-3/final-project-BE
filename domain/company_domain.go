@@ -2,15 +2,19 @@ package domain
 
 import (
 	"errors"
+	"mime/multipart"
 )
 
 var (
-	MessageSuccessAddJob = "Job added successfully"
+	MessageSuccessAddJob               = "Job added successfully"
+	MessageSuccessUpdateProfileCompany = "Company profile updated successfully"
 
-	MessageFailedAddJob = "Failed to add job"
+	MessageFailedAddJob               = "Failed to add job"
+	MessageFailedUpdateProfileCompany = "Failed to update company profile"
 
-	ErrJobNotCreated = errors.New("job not created")
-	ErrJobNotUpdated = errors.New("job not updated")
+	ErrJobNotCreated     = errors.New("job not created")
+	ErrJobNotUpdated     = errors.New("job not updated")
+	ErrCompanyNotUpdated = errors.New("company not updated")
 )
 
 type (
@@ -75,5 +79,13 @@ type (
 		SalaryMax       int    `json:"max_salary"`
 		Description     string `json:"description"`
 		Skills          []string
+	}
+
+	CompanyUpdateProfileRequest struct {
+		CompanyID string                `json:"company_id" form:"company_id" validate:"required"`
+		Name      string                `json:"name"`
+		Industry  string                `json:"industry"`
+		Logo      *multipart.FileHeader `json:"logo"`
+		Headline  *multipart.FileHeader `json:"cover"`
 	}
 )

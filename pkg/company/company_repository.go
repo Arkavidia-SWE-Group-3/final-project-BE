@@ -17,6 +17,7 @@ type (
 		AddJobSkill(ctx context.Context, jobSkill entities.JobSkill) error
 		UpdateJob(ctx context.Context, job entities.Job) error
 		DeleteJobSkillsByJobID(ctx context.Context, jobID uuid.UUID) error
+		UpdateProfile(ctx context.Context, company entities.Companies) error
 	}
 	companyRepository struct {
 		db *gorm.DB
@@ -34,6 +35,13 @@ func (r *companyRepository) GetBySlug(ctx context.Context, slug string) (entitie
 	}
 	return company, nil
 
+}
+
+func (r *companyRepository) UpdateProfile(ctx context.Context, company entities.Companies) error {
+	if err := r.db.WithContext(ctx).Model(&company).Updates(&company).Error; err != nil {
+		return err
+	}
+	return nil
 }
 
 func (r *companyRepository) GetJobsByCompanyID(ctx context.Context, companyID uuid.UUID) ([]entities.Job, error) {

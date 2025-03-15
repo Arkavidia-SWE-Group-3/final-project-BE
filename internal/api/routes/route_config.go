@@ -63,6 +63,7 @@ func (c *Config) Company() {
 	company := c.App.Group("/api/company")
 	{
 		company.Get("/profile/:slug", c.CompanyHandler.GetProfile)
+		company.Patch("/update-profile", c.CompanyHandler.UpdateProfile)
 		company.Post("/add-job", c.CompanyHandler.AddJob)
 		company.Patch("/update-job", c.CompanyHandler.UpdateJob)
 	}

@@ -16,6 +16,7 @@ type (
 		GetProfile(ctx context.Context, slug string) (*domain.CompanyProfileResponse, error)
 		AddJob(ctx context.Context, companyID string, req domain.CompanyAddJobRequest) error
 		UpdateJob(ctx context.Context, companyID string, req domain.CompanyUpdateJobRequest) error
+		UpdateProfile(ctx context.Context, req domain.CompanyUpdateProfileRequest) error
 	}
 
 	companyService struct {
@@ -94,6 +95,32 @@ func (s *companyService) GetProfile(ctx context.Context, slug string) (*domain.C
 		CompanyInfo: companyInfoResponse,
 		ComapnyJobs: companyJobsResponse,
 	}, nil
+}
+
+func (s *companyService) UpdateProfile(ctx context.Context, req domain.CompanyUpdateProfileRequest) error {
+	company := entities.Companies{
+		ID:       uuid.MustParse(req.CompanyID),
+		Name:     req.Name,
+		Industry: req.Industry,
+	}
+
+	allowedMimetype := []string{"image/jpeg", "image/png"}
+
+	if req.Logo != nil {
+		s.awsS3.UploadFile(req.Logo.Filename, req.Logo, "profile-picture", allowedMimetype...)
+	}
+
+	if req.Headline != nil {
+		s.awsS3.UploadFile(req.Headline.Filename, req.Headline, "headline", allowedMimetype...)
+	}
+
+	err := s.companyRepository.UpdateProfile(ctx, company)
+
+	if err != nil {
+		return domain.ErrCompanyNotUpdated
+	}
+
+	return nil
 }
 
 func (s *companyService) AddJob(ctx context.Context, companyID string, req domain.CompanyAddJobRequest) error {
