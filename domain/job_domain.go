@@ -1,12 +1,16 @@
 package domain
 
+import "mime/multipart"
+
 var (
 	MessageFailedGetJobs      = "Failed to get jobs"
 	MessageFailedSearchJobs   = "Failed to search jobs"
 	MessageFailedGetJobDetail = "Successfully get job detail"
+	MessageFailedApplyJob     = "Failed to apply job"
 
 	MessageSuccessSearchJobs   = "Successfully search jobs"
 	MessageSuccessGetJobDetail = "Successfully get job detail"
+	MessageSuccessApplyJob     = "Successfully apply job"
 )
 
 type (
@@ -19,6 +23,11 @@ type (
 		MaxSalary       int    `json:"max_salary"`
 		DatePosted      string `json:"date_posted"`
 		SortBy          string `json:"sort_by"`
+	}
+
+	JobApplyRequest struct {
+		JobID  string                `json:"job_id" form:"job_id"`
+		Resume *multipart.FileHeader `json:"resume" form:"resume"`
 	}
 
 	JobSearchResponse struct {

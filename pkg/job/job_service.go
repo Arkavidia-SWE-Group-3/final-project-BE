@@ -2,16 +2,20 @@ package job
 
 import (
 	"Go-Starter-Template/domain"
+	"Go-Starter-Template/entities"
 	"Go-Starter-Template/internal/utils"
 	"Go-Starter-Template/internal/utils/storage"
 	jwtService "Go-Starter-Template/pkg/jwt"
 	"context"
+
+	"github.com/google/uuid"
 )
 
 type (
 	JobService interface {
 		SearchJob(ctx context.Context, jobFilters domain.JobSearchRequest) ([]domain.JobSearchResponse, error)
 		GetJobDetail(ctx context.Context, id string) (domain.JobDetailResponse, error)
+		ApplyJob(ctx context.Context, req domain.JobApplyRequest, userID string) error
 	}
 
 	jobService struct {
@@ -109,4 +113,45 @@ func (s *jobService) SearchJob(ctx context.Context, jobFilters domain.JobSearchR
 	}
 
 	return jobSearchResponse, nil
+}
+
+func (s *jobService) ApplyJob(ctx context.Context, req domain.JobApplyRequest, userID string) error {
+	parsedUserID, err := uuid.Parse(userID)
+
+	if err != nil {
+		return domain.ErrParseUUID
+	}
+
+	parsedJobID, err := uuid.Parse(req.JobID)
+
+	if err != nil {
+		return domain.ErrParseUUID
+	}
+
+	jobApplication := entities.JobApplication{
+		ID:     uuid.New(),
+		JobID:  parsedJobID,
+		UserID: parsedUserID,
+		Status: "Under Review",
+	}
+
+	allowedMimeTypes := []string{"application/pdf"}
+
+	if req.Resume != nil {
+		objectKey, err := s.awsS3.UploadFile(userID, req.Resume, "resume", allowedMimeTypes...)
+
+		if err != nil {
+			return domain.ErrUploadFile
+		}
+
+		jobApplication.CV = s.awsS3.GetPublicLinkKey(objectKey)
+
+		err = s.jobRepository.ApplyJob(ctx, jobApplication)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

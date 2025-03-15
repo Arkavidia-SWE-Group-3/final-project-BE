@@ -17,6 +17,7 @@ type (
 	JobHandler interface {
 		SearchJob(c *fiber.Ctx) error
 		GetJobDetail(c *fiber.Ctx) error
+		ApplyJob(c *fiber.Ctx) error
 	}
 	jobHandler struct {
 		JobService job.JobService
@@ -85,4 +86,28 @@ func (h *jobHandler) SearchJob(c *fiber.Ctx) error {
 	}
 
 	return presenters.SuccessResponse(c, res, fiber.StatusOK, domain.MessageSuccessSearchJobs)
+}
+
+func (h *jobHandler) ApplyJob(c *fiber.Ctx) error {
+	req := new(domain.JobApplyRequest)
+
+	if err := c.BodyParser(req); err != nil {
+		return presenters.ErrorResponse(c, fiber.StatusBadRequest, domain.MessageFailedApplyJob, err)
+	}
+
+	if err := h.Validator.Struct(req); err != nil {
+		return presenters.ErrorResponse(c, fiber.StatusBadRequest, domain.MessageFailedApplyJob, err)
+	}
+
+	userid := c.Locals("user_id").(string)
+
+	req.Resume, _ = c.FormFile("resume")
+
+	err := h.JobService.ApplyJob(c.Context(), *req, userid)
+
+	if err != nil {
+		return presenters.ErrorResponse(c, fiber.StatusBadRequest, domain.MessageFailedApplyJob, err)
+	}
+
+	return presenters.SuccessResponse(c, nil, fiber.StatusOK, domain.MessageSuccessApplyJob)
 }

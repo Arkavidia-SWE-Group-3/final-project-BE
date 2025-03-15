@@ -76,6 +76,7 @@ func (c *Config) Job() {
 	{
 		job.Get("/detail/:id", c.JobHandler.GetJobDetail)
 		job.Get("/search", c.JobHandler.SearchJob)
+		job.Post("/apply", c.Middleware.AuthMiddleware(c.JwtService), c.JobHandler.ApplyJob)
 	}
 }
 

@@ -12,6 +12,7 @@ type (
 	JobRepository interface {
 		SearchJob(ctx context.Context, filters domain.JobSearchRequest) ([]entities.Job, error)
 		GetJobDetail(ctx context.Context, id string) (entities.Job, error)
+		ApplyJob(ctx context.Context, jobApplication entities.JobApplication) error
 	}
 	jobRepository struct {
 		db *gorm.DB
@@ -84,4 +85,13 @@ func (r *jobRepository) SearchJob(ctx context.Context, filters domain.JobSearchR
 	}
 
 	return jobs, nil
+}
+
+func (r *jobRepository) ApplyJob(ctx context.Context, jobApplication entities.JobApplication) error {
+
+	if err := r.db.WithContext(ctx).Create(&jobApplication).Error; err != nil {
+		return err
+	}
+
+	return nil
 }
