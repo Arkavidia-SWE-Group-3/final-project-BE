@@ -88,11 +88,14 @@ func (h *userHandler) UpdateProfile(c *fiber.Ctx) error {
 	}
 	req.ProfilePicture, _ = c.FormFile("profile_picture")
 	req.Headline, _ = c.FormFile("headline")
+
 	if err := h.Validator.Struct(req); err != nil {
 		return presenters.ErrorResponse(c, fiber.StatusBadRequest, domain.MessageFailedBodyRequest, err)
 	}
 
-	if err := h.UserService.UpdateProfile(c.Context(), *req); err != nil {
+	userid := c.Locals("user_id").(string)
+
+	if err := h.UserService.UpdateProfile(c.Context(), *req, userid); err != nil {
 		return presenters.ErrorResponse(c, fiber.StatusBadRequest, domain.MessageFailedUpdateUser, err)
 	}
 

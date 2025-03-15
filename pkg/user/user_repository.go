@@ -18,7 +18,7 @@ type (
 		CheckUserByID(ctx context.Context, id string) bool
 		UpdateSubscriptionStatus(ctx context.Context, userID string) error
 		GetProfile(ctx context.Context, slug string) (domain.UserProfileResponse, error)
-		UpdateProfile(ctx context.Context, user entities.User) error
+		UpdateProfile(ctx context.Context, user entities.User, userID uuid.UUID) error
 		PostEducation(ctx context.Context, req entities.UserEducation) error
 		UpdateEducation(ctx context.Context, req entities.UserEducation) error
 		DeleteEducation(ctx context.Context, id uuid.UUID) error
@@ -160,8 +160,10 @@ func (r *userRepository) GetProfile(ctx context.Context, slug string) (domain.Us
 	}, nil
 }
 
-func (r *userRepository) UpdateProfile(ctx context.Context, user entities.User) error {
-	if err := r.db.WithContext(ctx).Updates(&user).Error; err != nil {
+func (r *userRepository) UpdateProfile(ctx context.Context, user entities.User, userID uuid.UUID) error {
+	if err := r.db.WithContext(ctx).
+		Where("id = ?", userID).
+		Updates(&user).Error; err != nil {
 		return err
 	}
 	return nil

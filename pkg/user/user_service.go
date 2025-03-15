@@ -18,7 +18,7 @@ type (
 		RegisterUser(ctx context.Context, req domain.UserRegisterRequest) (domain.UserRegisterResponse, error)
 		Login(ctx context.Context, req domain.UserLoginRequest) (domain.UserLoginResponse, error)
 		GetProfile(ctx context.Context, userID string) (domain.UserProfileResponse, error)
-		UpdateProfile(ctx context.Context, req domain.UpdateUserRequest) error
+		UpdateProfile(ctx context.Context, req domain.UpdateUserRequest, userID string) error
 		PostEducation(ctx context.Context, req domain.PostUserEducationRequest, userID string) error
 		DeleteEducation(ctx context.Context, educationID string) error
 		UpdateEducation(ctx context.Context, req domain.UpdateUserEducationRequest, userID string) error
@@ -136,47 +136,41 @@ func (s *userService) GetProfile(ctx context.Context, slug string) (domain.UserP
 
 }
 
-func (s *userService) UpdateProfile(ctx context.Context, req domain.UpdateUserRequest) error {
-	exist := s.userRepository.CheckUserByEmail(ctx, req.Email)
-	if !exist {
-		return domain.ErrUserNotFound
+func (s *userService) UpdateProfile(ctx context.Context, req domain.UpdateUserRequest, userID string) error {
+	user := entities.User{
+		Name:         req.Name,
+		About:        req.About,
+		Address:      req.Address,
+		CurrentTitle: req.CurrentTitle,
 	}
-	user, err := s.userRepository.GetUserByEmail(ctx, req.Email)
-	if err != nil {
-		return err
-	}
-	if req.Name != "" {
-		user.Name = req.Name
-	}
-	if req.Email != "" {
-		user.Email = req.NewEmail
-	}
-	if req.About != "" {
-		user.About = req.About
-	}
-	if req.Address != "" {
-		user.Address = req.Address
-	}
-	if req.CurrentTitle != "" {
-		user.CurrentTitle = req.CurrentTitle
-	}
+
 	allowedMimetype := []string{"image/jpeg", "image/png"}
 	if req.ProfilePicture != nil {
 
-		_, err := s.awsS3.UploadFile(user.ProfilePicture, req.ProfilePicture, "profile-picture", allowedMimetype...)
+		objectKey, err := s.awsS3.UploadFile(user.ProfilePicture, req.ProfilePicture, "profile-picture", allowedMimetype...)
 		if err != nil {
 			return domain.ErrUploadFile
 		}
 
+		user.ProfilePicture = s.awsS3.GetPublicLinkKey(objectKey)
 	}
 
 	if req.Headline != nil {
-		_, err := s.awsS3.UploadFile(user.Headline, req.Headline, "headline", allowedMimetype...)
+		objectKey, err := s.awsS3.UploadFile(user.Headline, req.Headline, "headline", allowedMimetype...)
 		if err != nil {
 			return domain.ErrUploadFile
 		}
+		user.Headline = s.awsS3.GetPublicLinkKey(objectKey)
+
 	}
-	if err := s.userRepository.UpdateProfile(ctx, user); err != nil {
+
+	parsedUserID, err := uuid.Parse(userID)
+
+	if err != nil {
+		return domain.ErrParseUUID
+	}
+
+	if err := s.userRepository.UpdateProfile(ctx, user, parsedUserID); err != nil {
 		return err
 	}
 	return nil

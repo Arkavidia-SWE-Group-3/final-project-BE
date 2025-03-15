@@ -133,8 +133,6 @@ type (
 
 	UpdateUserRequest struct {
 		Name           string                `json:"name" form:"name"`
-		Email          string                `json:"email" form:"email" validate:"required,email"`
-		NewEmail       string                `json:"new_email" form:"new_email" validate:"email"`
 		About          string                `json:"about" form:"about"`
 		Address        string                `json:"address" form:"address"`
 		CurrentTitle   string                `json:"current_title" form:"current_title"`
