@@ -85,6 +85,7 @@ func (s *userService) RegisterUser(ctx context.Context, req domain.UserRegisterR
 		Headline:       headline,
 		IsPremium:      false,
 		Role:           domain.RoleUser,
+		Slug:           utils.CreateSlug(req.Name),
 	}
 
 	create, err := s.userRepository.RegisterUser(ctx, user)
