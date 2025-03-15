@@ -190,6 +190,7 @@ func (s *userService) PostEducation(ctx context.Context, req domain.PostUserEduc
 	if err != nil {
 		return domain.ErrParseUUID
 	}
+
 	education := entities.UserEducation{
 		ID:           uuid.New(),
 		UserID:       userid,
@@ -197,20 +198,8 @@ func (s *userService) PostEducation(ctx context.Context, req domain.PostUserEduc
 		Degree:       req.Degree,
 		FieldOfStudy: req.FieldOfStudy,
 		Description:  req.Description,
-		StartedAt: func() time.Time {
-			startedAt, err := time.Parse("2006-01-02", req.StartDate)
-			if err != nil {
-				return time.Time{}
-			}
-			return startedAt
-		}(),
-		EndedAt: func() time.Time {
-			endedAt, err := time.Parse("2006-01-02", req.EndDate)
-			if err != nil {
-				return time.Time{}
-			}
-			return endedAt
-		}(),
+		StartedAt:    utils.ConvertStringToTime(req.StartDate),
+		EndedAt:      time.Time{},
 	}
 
 	if err := s.userRepository.PostEducation(ctx, education); err != nil {
@@ -296,20 +285,8 @@ func (s *userService) PostExperience(ctx context.Context, req domain.PostUserExp
 		CompanyID:   companyID,
 		Location:    req.Location,
 		Description: req.Description,
-		StartedAt: func() time.Time {
-			startedAt, err := time.Parse("2006-01-02", req.StartDate)
-			if err != nil {
-				return time.Time{}
-			}
-			return startedAt
-		}(),
-		EndedAt: func() time.Time {
-			endedAt, err := time.Parse("2006-01-02", req.EndDate)
-			if err != nil {
-				return time.Time{}
-			}
-			return endedAt
-		}(),
+		StartedAt:   utils.ConvertStringToTime(req.StartDate),
+		EndedAt:     utils.ConvertStringToTime(req.EndDate),
 	}
 
 	if err := s.userRepository.PostExperience(ctx, userExperience); err != nil {
