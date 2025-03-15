@@ -7,6 +7,7 @@ import (
 	"Go-Starter-Template/internal/utils"
 	"Go-Starter-Template/internal/utils/storage"
 	"Go-Starter-Template/pkg/company"
+	"Go-Starter-Template/pkg/job"
 	"Go-Starter-Template/pkg/jwt"
 	"Go-Starter-Template/pkg/midtrans"
 	"Go-Starter-Template/pkg/user"
@@ -57,6 +58,7 @@ func NewApp(db *gorm.DB) (*fiber.App, error) {
 	userRepository := user.NewUserRepository(db)
 	companyRepository := company.NewCompanyRepository(db)
 	midtransRepository := midtrans.NewMidtransRepository(db)
+	jobRepository := job.NewJobRepository(db)
 
 	// Service
 	userService := user.NewUserService(userRepository, awsS3, jwtService)
@@ -65,11 +67,13 @@ func NewApp(db *gorm.DB) (*fiber.App, error) {
 		midtransRepository,
 		userRepository,
 	)
+	jobService := job.NewJobService(jobRepository, awsS3, jwtService)
 
 	// Handler
 	userHandler := handlers.NewUserHandler(userService, validator)
 	companyHandler := handlers.NewCompanyHandler(companyService, validator)
 	midtransHandler := handlers.NewMidtransHandler(midtransService, validator)
+	jobHandler := handlers.NewJobHandler(jobService, validator)
 
 	// routes
 	routesConfig := routes.Config{
@@ -79,6 +83,7 @@ func NewApp(db *gorm.DB) (*fiber.App, error) {
 		MidtransHandler: midtransHandler,
 		Middleware:      middlewares,
 		JwtService:      jwtService,
+		JobHandler:      jobHandler,
 	}
 	routesConfig.Setup()
 	return app, nil

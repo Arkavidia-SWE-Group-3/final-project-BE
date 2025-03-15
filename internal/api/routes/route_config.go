@@ -12,6 +12,7 @@ type Config struct {
 	App             *fiber.App
 	UserHandler     handlers.UserHandler
 	CompanyHandler  handlers.CompanyHandler
+	JobHandler      handlers.JobHandler
 	MidtransHandler handlers.MidtransHandler
 	Middleware      middleware.Middleware
 	JwtService      jwtService.JWTService
@@ -21,6 +22,7 @@ func (c *Config) Setup() {
 	c.App.Use(c.Middleware.CORSMiddleware())
 	c.User()
 	c.Company()
+	c.Job()
 	c.GuestRoute()
 	c.AuthRoute()
 }
@@ -66,6 +68,14 @@ func (c *Config) Company() {
 		company.Patch("/update-profile", c.CompanyHandler.UpdateProfile)
 		company.Post("/add-job", c.CompanyHandler.AddJob)
 		company.Patch("/update-job", c.CompanyHandler.UpdateJob)
+	}
+}
+
+func (c *Config) Job() {
+	job := c.App.Group("/api/job")
+	{
+		// job.Get("/detail/:slug", c.JobHandler.GetJobDetail)
+		job.Get("/search", c.JobHandler.SearchJob)
 	}
 }
 
