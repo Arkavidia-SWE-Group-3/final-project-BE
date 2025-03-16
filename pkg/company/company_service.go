@@ -16,7 +16,9 @@ type (
 		GetProfile(ctx context.Context, slug string) (*domain.CompanyProfileResponse, error)
 		AddJob(ctx context.Context, companyID string, req domain.CompanyAddJobRequest) error
 		UpdateJob(ctx context.Context, companyID string, req domain.CompanyUpdateJobRequest) error
-		UpdateProfile(ctx context.Context, req domain.CompanyUpdateProfileRequest) error
+		UpdateProfile(ctx context.Context, req domain.CompanyUpdateProfileRequest, userID string) error
+		LoginCompany(ctx context.Context, req domain.CompanyLoginRequest) (*domain.CompanyLoginResponse, error)
+		RegisterCompany(ctx context.Context, req domain.CompanyRegisterRequest) error
 	}
 
 	companyService struct {
@@ -28,6 +30,66 @@ type (
 
 func NewCompanyService(companyRepository CompanyRepository, awsS3 storage.AwsS3, jwtService jwtService.JWTService) CompanyService {
 	return &companyService{companyRepository: companyRepository, awsS3: awsS3, jwtService: jwtService}
+}
+
+func (s *companyService) LoginCompany(ctx context.Context, req domain.CompanyLoginRequest) (*domain.CompanyLoginResponse, error) {
+	user, company, err := s.companyRepository.GetCompanyByEmail(ctx, req.Email)
+
+	if err != nil {
+		return nil, domain.ErrCompanyNotFound
+	}
+
+	if !utils.CheckPassword(req.Password, user.Password) {
+		return nil, domain.CredentialInvalid
+	}
+
+	token := s.jwtService.GenerateTokenUser(user.ID.String(), user.Role)
+
+	return &domain.CompanyLoginResponse{
+		Email:          user.Email,
+		Token:          token,
+		Role:           user.Role,
+		Slug:           company.Slug,
+		Name:           company.Name,
+		CurrentTitle:   "",
+		ProfilePicture: user.ProfilePicture,
+	}, nil
+}
+
+func (s *companyService) RegisterCompany(ctx context.Context, req domain.CompanyRegisterRequest) error {
+	_, _, err := s.companyRepository.GetCompanyByEmail(ctx, req.Email)
+
+	if err == nil {
+		return domain.ErrCompanyAlreadyRegistered
+	}
+
+	password, err := utils.HashPassword(req.Password)
+
+	if err != nil {
+		return err
+	}
+
+	company := entities.Companies{
+		Name:     req.Name,
+		Slug:     utils.CreateSlug(req.Name),
+		About:    req.About,
+		Industry: req.Industry,
+	}
+
+	user := entities.User{
+		Name:     req.Name,
+		Email:    req.Email,
+		Password: password,
+		Role:     "company",
+	}
+
+	err = s.companyRepository.RegisterCompany(ctx, company, user)
+
+	if err != nil {
+		return domain.ErrCompanyNotRegistered
+	}
+
+	return nil
 }
 
 func (s *companyService) GetProfile(ctx context.Context, slug string) (*domain.CompanyProfileResponse, error) {
@@ -46,8 +108,8 @@ func (s *companyService) GetProfile(ctx context.Context, slug string) (*domain.C
 		Name:     company.Name,
 		About:    company.About,
 		Industry: company.Industry,
-		Logo:     "",
-		Headline: "",
+		Logo:     company.User.ProfilePicture,
+		Headline: company.User.Headline,
 	}
 
 	var companyJobsResponse []domain.CompanyJobsResponse
@@ -97,7 +159,7 @@ func (s *companyService) GetProfile(ctx context.Context, slug string) (*domain.C
 	}, nil
 }
 
-func (s *companyService) UpdateProfile(ctx context.Context, req domain.CompanyUpdateProfileRequest) error {
+func (s *companyService) UpdateProfile(ctx context.Context, req domain.CompanyUpdateProfileRequest, userID string) error {
 	company := entities.Companies{
 		ID:       uuid.MustParse(req.CompanyID),
 		Name:     req.Name,
@@ -105,17 +167,39 @@ func (s *companyService) UpdateProfile(ctx context.Context, req domain.CompanyUp
 		About:    req.About,
 	}
 
+	parsedUserID, err := uuid.Parse(userID)
+
+	if err != nil {
+		return domain.ErrParseUUID
+	}
+
+	user := entities.User{
+		ID: parsedUserID,
+	}
+
 	allowedMimetype := []string{"image/jpeg", "image/png"}
 
 	if req.Logo != nil {
-		s.awsS3.UploadFile(req.Logo.Filename, req.Logo, "profile-picture", allowedMimetype...)
+		objectKey, err := s.awsS3.UploadFile(req.Logo.Filename, req.Logo, "profile-picture", allowedMimetype...)
+
+		if err != nil {
+			return domain.ErrUploadFile
+		}
+
+		user.ProfilePicture = s.awsS3.GetPublicLinkKey(objectKey)
 	}
 
 	if req.Headline != nil {
-		s.awsS3.UploadFile(req.Headline.Filename, req.Headline, "headline", allowedMimetype...)
+		objectKey, err := s.awsS3.UploadFile(req.Headline.Filename, req.Headline, "headline", allowedMimetype...)
+
+		if err != nil {
+			return domain.ErrUploadFile
+		}
+
+		user.Headline = s.awsS3.GetPublicLinkKey(objectKey)
 	}
 
-	err := s.companyRepository.UpdateProfile(ctx, company)
+	err = s.companyRepository.UpdateProfile(ctx, company, user)
 
 	if err != nil {
 		return domain.ErrCompanyNotUpdated

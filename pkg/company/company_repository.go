@@ -17,7 +17,9 @@ type (
 		AddJobSkill(ctx context.Context, jobSkill entities.JobSkill) error
 		UpdateJob(ctx context.Context, job entities.Job) error
 		DeleteJobSkillsByJobID(ctx context.Context, jobID uuid.UUID) error
-		UpdateProfile(ctx context.Context, company entities.Companies) error
+		UpdateProfile(ctx context.Context, company entities.Companies, user entities.User) error
+		RegisterCompany(ctx context.Context, company entities.Companies, user entities.User) error
+		GetCompanyByEmail(ctx context.Context, email string) (entities.User, entities.Companies, error)
 	}
 	companyRepository struct {
 		db *gorm.DB
@@ -28,19 +30,60 @@ func NewCompanyRepository(db *gorm.DB) CompanyRepository {
 	return &companyRepository{db: db}
 }
 
+func (r *companyRepository) GetCompanyByEmail(ctx context.Context, email string) (entities.User, entities.Companies, error) {
+	var user entities.User
+	var company entities.Companies
+
+	if err := r.db.WithContext(ctx).First(&user, "email = ?", email).Error; err != nil {
+		return entities.User{}, entities.Companies{}, err
+	}
+
+	if err := r.db.WithContext(ctx).First(&company, "user_id = ?", user.ID).Error; err != nil {
+		return entities.User{}, entities.Companies{}, err
+	}
+
+	return user, company, nil
+}
+
+func (r *companyRepository) RegisterCompany(ctx context.Context, company entities.Companies, user entities.User) error {
+	companyID := uuid.New()
+	userID := uuid.New()
+
+	company.ID = companyID
+	user.ID = userID
+
+	company.UserID = userID
+
+	if err := r.db.WithContext(ctx).Create(&user).Error; err != nil {
+		return err
+	}
+
+	if err := r.db.WithContext(ctx).Create(&company).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (r *companyRepository) GetBySlug(ctx context.Context, slug string) (entities.Companies, error) {
 	var company entities.Companies
-	if err := r.db.WithContext(ctx).First(&company, "slug = ?", slug).Error; err != nil {
+	if err := r.db.WithContext(ctx).Preload("User").First(&company, "slug = ?", slug).Error; err != nil {
 		return entities.Companies{}, err
 	}
+
 	return company, nil
 
 }
 
-func (r *companyRepository) UpdateProfile(ctx context.Context, company entities.Companies) error {
+func (r *companyRepository) UpdateProfile(ctx context.Context, company entities.Companies, user entities.User) error {
 	if err := r.db.WithContext(ctx).Model(&company).Updates(&company).Error; err != nil {
 		return err
 	}
+
+	if err := r.db.WithContext(ctx).Model(&user).Updates(&user).Error; err != nil {
+		return err
+	}
+
 	return nil
 }
 

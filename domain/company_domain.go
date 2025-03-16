@@ -8,13 +8,18 @@ import (
 var (
 	MessageSuccessAddJob               = "Job added successfully"
 	MessageSuccessUpdateProfileCompany = "Company profile updated successfully"
+	MessageSuccessRegisterCompany      = "Company registered successfully"
 
 	MessageFailedAddJob               = "Failed to add job"
 	MessageFailedUpdateProfileCompany = "Failed to update company profile"
+	MessageFailedRegisterCompany      = "Failed to register company"
 
-	ErrJobNotCreated     = errors.New("job not created")
-	ErrJobNotUpdated     = errors.New("job not updated")
-	ErrCompanyNotUpdated = errors.New("company not updated")
+	ErrJobNotCreated            = errors.New("job not created")
+	ErrJobNotUpdated            = errors.New("job not updated")
+	ErrCompanyNotUpdated        = errors.New("company not updated")
+	ErrCompanyNotRegistered     = errors.New("company not created")
+	ErrCompanyAlreadyRegistered = errors.New("company already registered")
+	ErrCompanyNotFound          = errors.New("company not found")
 )
 
 type (
@@ -47,6 +52,16 @@ type (
 		Posted          string                     `json:"posted"`
 	}
 
+	CompanyLoginResponse struct {
+		Email          string `json:"email"`
+		Token          string `json:"token"`
+		Role           string `json:"role"`
+		Slug           string `json:"slug"`
+		Name           string `json:"name"`
+		CurrentTitle   string `json:"current_title"`
+		ProfilePicture string `json:"profile_picture"`
+	}
+
 	CompanyJobSkillsResponse struct {
 		ID      string `json:"id"`
 		SkillID string `json:"skill_id"`
@@ -65,6 +80,19 @@ type (
 		Description     string `json:"description"`
 		Skills          []string
 		Status          string `json:"status"`
+	}
+
+	CompanyRegisterRequest struct {
+		Name     string `json:"name"`
+		Email    string `json:"email"`
+		Password string `json:"password"`
+		About    string `json:"about"`
+		Industry string `json:"industry"`
+	}
+
+	CompanyLoginRequest struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
 	}
 
 	CompanyUpdateJobRequest struct {

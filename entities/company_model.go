@@ -8,6 +8,9 @@ type Companies struct {
 	Slug     string    `json:"slug"`
 	About    string    `json:"about"`
 	Industry string    `json:"industry"`
+	UserID   uuid.UUID `json:"user_id"`
+
+	User *User `gorm:"foreignKey:UserID"`
 
 	Timestamp
 }

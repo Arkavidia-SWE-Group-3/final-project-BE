@@ -64,6 +64,8 @@ func (c *Config) User() {
 func (c *Config) Company() {
 	company := c.App.Group("/api/company")
 	{
+		company.Post("/login", c.CompanyHandler.LoginCompany)
+		company.Post("/register", c.CompanyHandler.RegisterCompany)
 		company.Get("/profile/:slug", c.CompanyHandler.GetProfile)
 		company.Patch("/update-profile", c.Middleware.AuthMiddleware(c.JwtService), c.CompanyHandler.UpdateProfile)
 		company.Post("/add-job", c.Middleware.AuthMiddleware(c.JwtService), c.CompanyHandler.AddJob)
