@@ -113,6 +113,10 @@ func (s *userService) Login(ctx context.Context, req domain.UserLoginRequest) (d
 		return domain.UserLoginResponse{}, domain.CredentialInvalid
 	}
 
+	if user.Role != "user" {
+		return domain.UserLoginResponse{}, domain.ErrUserNotFound
+	}
+
 	token := s.jwtService.GenerateTokenUser(user.ID.String(), user.Role)
 
 	return domain.UserLoginResponse{

@@ -39,6 +39,10 @@ func (s *companyService) LoginCompany(ctx context.Context, req domain.CompanyLog
 		return nil, domain.ErrCompanyNotFound
 	}
 
+	if user.Role != "company" {
+		return nil, domain.ErrCompanyNotFound
+	}
+
 	if !utils.CheckPassword(req.Password, user.Password) {
 		return nil, domain.CredentialInvalid
 	}
