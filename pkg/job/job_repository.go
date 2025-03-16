@@ -27,7 +27,7 @@ func NewJobRepository(db *gorm.DB) JobRepository {
 
 func (r *jobRepository) GetJobDetail(ctx context.Context, id string) (entities.Job, error) {
 	var job entities.Job
-	err := r.db.WithContext(ctx).Preload("Company.User").Preload("Skills").Where("id = ?", id).First(&job).Error
+	err := r.db.WithContext(ctx).Preload("Company").Preload("Skills").Where("id = ?", id).First(&job).Error
 
 	if err != nil {
 		return entities.Job{}, err
