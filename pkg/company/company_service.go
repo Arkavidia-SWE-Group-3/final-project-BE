@@ -184,7 +184,7 @@ func (s *companyService) UpdateProfile(ctx context.Context, req domain.CompanyUp
 	allowedMimetype := []string{"image/jpeg", "image/png"}
 
 	if req.Logo != nil {
-		objectKey, err := s.awsS3.UploadFile(req.Logo.Filename, req.Logo, "profile-picture", allowedMimetype...)
+		objectKey, err := s.awsS3.UploadFile(utils.GenerateRandomFileName(req.Logo.Filename), req.Logo, "profile-picture", allowedMimetype...)
 
 		if err != nil {
 			return domain.ErrUploadFile
@@ -194,7 +194,7 @@ func (s *companyService) UpdateProfile(ctx context.Context, req domain.CompanyUp
 	}
 
 	if req.Headline != nil {
-		objectKey, err := s.awsS3.UploadFile(req.Headline.Filename, req.Headline, "headline", allowedMimetype...)
+		objectKey, err := s.awsS3.UploadFile(utils.GenerateRandomFileName(req.Headline.Filename), req.Headline, "headline", allowedMimetype...)
 
 		if err != nil {
 			return domain.ErrUploadFile

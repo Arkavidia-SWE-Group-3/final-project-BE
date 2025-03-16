@@ -152,7 +152,7 @@ func (s *userService) UpdateProfile(ctx context.Context, req domain.UpdateUserRe
 	allowedMimetype := []string{"image/jpeg", "image/png"}
 	if req.ProfilePicture != nil {
 
-		objectKey, err := s.awsS3.UploadFile(user.ProfilePicture, req.ProfilePicture, "profile-picture", allowedMimetype...)
+		objectKey, err := s.awsS3.UploadFile(utils.GenerateRandomFileName(user.ProfilePicture), req.ProfilePicture, "profile-picture", allowedMimetype...)
 		if err != nil {
 			return domain.ErrUploadFile
 		}
@@ -161,7 +161,7 @@ func (s *userService) UpdateProfile(ctx context.Context, req domain.UpdateUserRe
 	}
 
 	if req.Headline != nil {
-		objectKey, err := s.awsS3.UploadFile(user.Headline, req.Headline, "headline", allowedMimetype...)
+		objectKey, err := s.awsS3.UploadFile(utils.GenerateRandomFileName(user.Headline), req.Headline, "headline", allowedMimetype...)
 		if err != nil {
 			return domain.ErrUploadFile
 		}
