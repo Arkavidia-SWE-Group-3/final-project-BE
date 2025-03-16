@@ -46,7 +46,7 @@ func (r *userRepository) RegisterUser(ctx context.Context, req entities.User) (e
 
 func (r *userRepository) CheckUserByEmail(ctx context.Context, email string) bool {
 	var user entities.User
-	if err := r.db.WithContext(ctx).First(user, "email = ?", email).Error; err != nil {
+	if err := r.db.WithContext(ctx).First(&user, "email = ?", email).Error; err != nil {
 		return false
 	}
 	if user.Email != email {
