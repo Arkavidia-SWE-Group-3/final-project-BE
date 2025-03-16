@@ -140,7 +140,7 @@ func (h *companyHandler) UpdateProfile(c *fiber.Ctx) error {
 	userID := c.Locals("user_id").(string)
 
 	req.Logo, _ = c.FormFile("logo")
-	req.Headline, _ = c.FormFile("headline")
+	req.Headline, _ = c.FormFile("cover")
 
 	err := h.CompanyService.UpdateProfile(c.Context(), req, userID)
 
