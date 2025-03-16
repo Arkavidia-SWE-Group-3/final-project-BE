@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"Go-Starter-Template/pkg/company"
-	"fmt"
 
 	"github.com/gofiber/fiber/v2"
 
@@ -139,8 +138,6 @@ func (h *companyHandler) UpdateProfile(c *fiber.Ctx) error {
 	}
 
 	userID := c.Locals("user_id").(string)
-
-	fmt.Printf("userID: %s\n", userID)
 
 	req.Logo, _ = c.FormFile("logo")
 	req.Headline, _ = c.FormFile("headline")
