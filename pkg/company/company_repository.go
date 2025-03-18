@@ -20,6 +20,7 @@ type (
 		UpdateProfile(ctx context.Context, company entities.Companies, user entities.User) error
 		RegisterCompany(ctx context.Context, company entities.Companies, user entities.User) error
 		GetCompanyByEmail(ctx context.Context, email string) (entities.User, entities.Companies, error)
+		GetCompanyByUserID(ctx context.Context, userID uuid.UUID) (entities.Companies, error)
 	}
 	companyRepository struct {
 		db *gorm.DB
@@ -28,6 +29,14 @@ type (
 
 func NewCompanyRepository(db *gorm.DB) CompanyRepository {
 	return &companyRepository{db: db}
+}
+
+func (r *companyRepository) GetCompanyByUserID(ctx context.Context, userID uuid.UUID) (entities.Companies, error) {
+	var company entities.Companies
+	if err := r.db.WithContext(ctx).Preload("User").First(&company, "user_id = ?", userID).Error; err != nil {
+		return entities.Companies{}, err
+	}
+	return company, nil
 }
 
 func (r *companyRepository) GetCompanyByEmail(ctx context.Context, email string) (entities.User, entities.Companies, error) {

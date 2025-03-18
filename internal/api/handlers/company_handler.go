@@ -97,7 +97,9 @@ func (h *companyHandler) AddJob(c *fiber.Ctx) error {
 		return presenters.ErrorResponse(c, fiber.StatusBadRequest, domain.MessageFailedAddJob, err)
 	}
 
-	err := h.CompanyService.AddJob(c.Context(), req.CompanyID, req)
+	userID := c.Locals("user_id").(string)
+
+	err := h.CompanyService.AddJob(c.Context(), req, userID)
 
 	if err != nil {
 		return presenters.ErrorResponse(c, fiber.StatusBadRequest, domain.MessageFailedAddJob, err)
@@ -117,7 +119,9 @@ func (h *companyHandler) UpdateJob(c *fiber.Ctx) error {
 		return presenters.ErrorResponse(c, fiber.StatusBadRequest, domain.MessageFailedAddJob, err)
 	}
 
-	err := h.CompanyService.UpdateJob(c.Context(), req.CompanyID, req)
+	userID := c.Locals("user_id").(string)
+
+	err := h.CompanyService.UpdateJob(c.Context(), req, userID)
 
 	if err != nil {
 		return presenters.ErrorResponse(c, fiber.StatusBadRequest, domain.MessageFailedAddJob, err)

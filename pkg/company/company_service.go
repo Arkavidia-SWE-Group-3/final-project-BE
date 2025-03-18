@@ -14,8 +14,8 @@ import (
 type (
 	CompanyService interface {
 		GetProfile(ctx context.Context, slug string) (*domain.CompanyProfileResponse, error)
-		AddJob(ctx context.Context, companyID string, req domain.CompanyAddJobRequest) error
-		UpdateJob(ctx context.Context, companyID string, req domain.CompanyUpdateJobRequest) error
+		AddJob(ctx context.Context, req domain.CompanyAddJobRequest, userID string) error
+		UpdateJob(ctx context.Context, req domain.CompanyUpdateJobRequest, userID string) error
 		UpdateProfile(ctx context.Context, req domain.CompanyUpdateProfileRequest, userID string) error
 		LoginCompany(ctx context.Context, req domain.CompanyLoginRequest) (*domain.CompanyLoginResponse, error)
 		RegisterCompany(ctx context.Context, req domain.CompanyRegisterRequest) error
@@ -164,17 +164,23 @@ func (s *companyService) GetProfile(ctx context.Context, slug string) (*domain.C
 }
 
 func (s *companyService) UpdateProfile(ctx context.Context, req domain.CompanyUpdateProfileRequest, userID string) error {
-	company := entities.Companies{
-		ID:       uuid.MustParse(req.CompanyID),
-		Name:     req.Name,
-		Industry: req.Industry,
-		About:    req.About,
-	}
-
 	parsedUserID, err := uuid.Parse(userID)
 
 	if err != nil {
 		return domain.ErrParseUUID
+	}
+
+	company_id, err := s.companyRepository.GetCompanyByUserID(ctx, parsedUserID)
+
+	if err != nil {
+		return domain.ErrCompanyNotFound
+	}
+
+	company := entities.Companies{
+		ID:       company_id.ID,
+		Name:     req.Name,
+		Industry: req.Industry,
+		About:    req.About,
 	}
 
 	user := entities.User{
@@ -212,10 +218,22 @@ func (s *companyService) UpdateProfile(ctx context.Context, req domain.CompanyUp
 	return nil
 }
 
-func (s *companyService) AddJob(ctx context.Context, companyID string, req domain.CompanyAddJobRequest) error {
+func (s *companyService) AddJob(ctx context.Context, req domain.CompanyAddJobRequest, userID string) error {
+	parsedUserID, err := uuid.Parse(userID)
+
+	if err != nil {
+		return domain.ErrParseUUID
+	}
+
+	company, err := s.companyRepository.GetCompanyByUserID(ctx, parsedUserID)
+
+	if err != nil {
+		return domain.ErrCompanyNotFound
+	}
 
 	job := entities.Job{
-		CompanyID:       uuid.MustParse(companyID),
+		ID:              uuid.New(),
+		CompanyID:       company.ID,
 		Title:           req.Title,
 		Location:        req.Location,
 		LocationType:    req.LocationType,
@@ -248,11 +266,23 @@ func (s *companyService) AddJob(ctx context.Context, companyID string, req domai
 	return nil
 }
 
-func (s *companyService) UpdateJob(ctx context.Context, companyID string, req domain.CompanyUpdateJobRequest) error {
+func (s *companyService) UpdateJob(ctx context.Context, req domain.CompanyUpdateJobRequest, userID string) error {
+
+	parsedUserID, err_parsed := uuid.Parse(userID)
+
+	if err_parsed != nil {
+		return domain.ErrParseUUID
+	}
+
+	companyID, err_get_company_id := s.companyRepository.GetCompanyByUserID(ctx, parsedUserID)
+
+	if err_get_company_id != nil {
+		return domain.ErrCompanyNotFound
+	}
 
 	job := entities.Job{
 		ID:              uuid.MustParse(req.JobID),
-		CompanyID:       uuid.MustParse(companyID),
+		CompanyID:       companyID.ID,
 		Title:           req.Title,
 		Location:        req.Location,
 		LocationType:    req.LocationType,
