@@ -9,13 +9,15 @@ import (
 )
 
 type Config struct {
-	App             *fiber.App
-	UserHandler     handlers.UserHandler
-	CompanyHandler  handlers.CompanyHandler
-	JobHandler      handlers.JobHandler
-	MidtransHandler handlers.MidtransHandler
-	Middleware      middleware.Middleware
-	JwtService      jwtService.JWTService
+	App               *fiber.App
+	UserHandler       handlers.UserHandler
+	CompanyHandler    handlers.CompanyHandler
+	ChatServerHandler handlers.ChatServerHandler
+	ChatHandler       handlers.ChatHandler
+	JobHandler        handlers.JobHandler
+	MidtransHandler   handlers.MidtransHandler
+	Middleware        middleware.Middleware
+	JwtService        jwtService.JWTService
 }
 
 func (c *Config) Setup() {
@@ -23,6 +25,7 @@ func (c *Config) Setup() {
 	c.User()
 	c.Company()
 	c.Job()
+	c.Chat()
 	c.GuestRoute()
 	c.AuthRoute()
 }
@@ -83,6 +86,19 @@ func (c *Config) Job() {
 		job.Post("/apply", c.Middleware.AuthMiddleware(c.JwtService), c.Middleware.OnlyAllow("user"), c.JobHandler.ApplyJob)
 		job.Post("/update-application", c.Middleware.AuthMiddleware(c.JwtService), c.Middleware.OnlyAllow("company"), c.JobHandler.ChangeApplicationStatus)
 	}
+}
+
+func (c *Config) Chat() {
+	c.ChatServerHandler.SetupRoutes(c.App)
+
+	chat := c.App.Group("/api/chat")
+	{
+		chat.Get("/rooms", c.Middleware.AuthMiddleware(c.JwtService), c.ChatHandler.GetChatRooms)
+		chat.Get("/room/:id", c.Middleware.AuthMiddleware(c.JwtService), c.ChatHandler.GetChatRoom)
+		chat.Post("/send", c.Middleware.AuthMiddleware(c.JwtService), c.ChatHandler.SendMessage)
+		chat.Get("/messages/:id", c.Middleware.AuthMiddleware(c.JwtService), c.ChatHandler.GetMessages)
+	}
+
 }
 
 func (c *Config) GuestRoute() {

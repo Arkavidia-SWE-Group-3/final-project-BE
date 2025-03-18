@@ -62,6 +62,15 @@ func Migrate(db *gorm.DB) error {
 		log.Fatalf("Error migrating views database: %v", err)
 		return err
 	}
+
+	if err := db.AutoMigrate(&entities.ChatRoom{}); err != nil {
+		log.Fatalf("Error migrating chat rooms database: %v", err)
+	}
+
+	if err := db.AutoMigrate(&entities.ChatMessage{}); err != nil {
+		log.Fatalf("Error migrating chat messages database: %v", err)
+	}
+
 	fmt.Println("Database migration complete")
 	return nil
 }

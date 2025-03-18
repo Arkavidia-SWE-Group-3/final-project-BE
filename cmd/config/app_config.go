@@ -6,6 +6,7 @@ import (
 	"Go-Starter-Template/internal/middleware"
 	"Go-Starter-Template/internal/utils"
 	"Go-Starter-Template/internal/utils/storage"
+	"Go-Starter-Template/pkg/chat"
 	"Go-Starter-Template/pkg/company"
 	"Go-Starter-Template/pkg/job"
 	"Go-Starter-Template/pkg/jwt"
@@ -59,6 +60,7 @@ func NewApp(db *gorm.DB) (*fiber.App, error) {
 	companyRepository := company.NewCompanyRepository(db)
 	midtransRepository := midtrans.NewMidtransRepository(db)
 	jobRepository := job.NewJobRepository(db)
+	chatRepository := chat.NewChatRepository(db)
 
 	// Service
 	userService := user.NewUserService(userRepository, awsS3, jwtService)
@@ -68,23 +70,29 @@ func NewApp(db *gorm.DB) (*fiber.App, error) {
 		userRepository,
 	)
 	jobService := job.NewJobService(jobRepository, awsS3, jwtService)
+	chatService := chat.NewChatService(chatRepository, jwtService)
 
 	// Handler
 	userHandler := handlers.NewUserHandler(userService, validator)
 	companyHandler := handlers.NewCompanyHandler(companyService, validator)
 	midtransHandler := handlers.NewMidtransHandler(midtransService, validator)
 	jobHandler := handlers.NewJobHandler(jobService, validator)
+	chatServerHandler := handlers.NewChatServerHandler()
+	chatHandler := handlers.NewChatHandler(chatService, validator)
 
 	// routes
 	routesConfig := routes.Config{
-		App:             app,
-		UserHandler:     userHandler,
-		CompanyHandler:  companyHandler,
-		MidtransHandler: midtransHandler,
-		Middleware:      middlewares,
-		JwtService:      jwtService,
-		JobHandler:      jobHandler,
+		App:               app,
+		UserHandler:       userHandler,
+		CompanyHandler:    companyHandler,
+		MidtransHandler:   midtransHandler,
+		Middleware:        middlewares,
+		JwtService:        jwtService,
+		JobHandler:        jobHandler,
+		ChatServerHandler: *chatServerHandler,
+		ChatHandler:       chatHandler,
 	}
+
 	routesConfig.Setup()
 	return app, nil
 }
