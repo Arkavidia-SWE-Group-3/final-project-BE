@@ -16,6 +16,8 @@ type (
 		ApplyJob(ctx context.Context, jobApplication entities.JobApplication) error
 		GetApplicants(ctx context.Context, jobID uuid.UUID) ([]entities.JobApplication, error)
 		CheckCompanyIDFromJob(ctx context.Context, jobID uuid.UUID, userID uuid.UUID) error
+		ChangeApplicationStatus(ctx context.Context, jobApplication entities.JobApplication) error
+		CheckCompanyIDFromApplication(ctx context.Context, jobApplicationID uuid.UUID, userID uuid.UUID) error
 	}
 	jobRepository struct {
 		db *gorm.DB
@@ -135,4 +137,48 @@ func (r *jobRepository) GetApplicants(ctx context.Context, jobID uuid.UUID) ([]e
 	}
 
 	return applicants, nil
+}
+
+func (r *jobRepository) ChangeApplicationStatus(ctx context.Context, jobApplication entities.JobApplication) error {
+	err := r.db.WithContext(ctx).Model(&entities.JobApplication{}).Where("id = ?", jobApplication.ID).Updates(&jobApplication).Error
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *jobRepository) CheckCompanyIDFromApplication(ctx context.Context, jobApplicationID uuid.UUID, userID uuid.UUID) error {
+
+	var jobApplication entities.JobApplication
+	var job entities.Job
+	var companyID uuid.UUID
+
+	err := r.db.WithContext(ctx).Where("id = ?", jobApplicationID).First(&jobApplication).Error
+
+	if err != nil {
+		return err
+	}
+
+	err = r.db.WithContext(ctx).Where("id = ?", jobApplication.JobID).First(&job).Error
+
+	if err != nil {
+		return err
+	}
+
+	companyID = job.CompanyID
+
+	var company entities.Companies
+	err = r.db.WithContext(ctx).Where("user_id = ?", userID).First(&company).Error
+
+	if err != nil {
+		return err
+	}
+
+	if companyID != company.ID {
+		return domain.ErrCompanyNotFound
+	}
+
+	return nil
 }

@@ -17,6 +17,7 @@ type (
 		GetJobDetail(ctx context.Context, id string) (domain.JobDetailResponse, error)
 		ApplyJob(ctx context.Context, req domain.JobApplyRequest, userID string) error
 		GetApplicants(ctx context.Context, jobID string, userID string) ([]domain.JobApplicantResponse, error)
+		ChangeApplicationStatus(ctx context.Context, req domain.JobChangeApplicationStatusRequest, userID string) error
 	}
 
 	jobService struct {
@@ -203,4 +204,37 @@ func (s *jobService) GetApplicants(ctx context.Context, jobID string, userID str
 	}
 
 	return jobApplicants, nil
+}
+
+func (s *jobService) ChangeApplicationStatus(ctx context.Context, req domain.JobChangeApplicationStatusRequest, userID string) error {
+	parsedUserID, err := uuid.Parse(userID)
+
+	if err != nil {
+		return domain.ErrParseUUID
+	}
+
+	parsedApplicationID, err := uuid.Parse(req.JobApplicationID)
+
+	if err != nil {
+		return domain.ErrParseUUID
+	}
+
+	err = s.jobRepository.CheckCompanyIDFromApplication(ctx, parsedApplicationID, parsedUserID)
+
+	if err != nil {
+		return err
+	}
+
+	jobApplication := entities.JobApplication{
+		ID:     parsedApplicationID,
+		Status: req.ApplicationStatus,
+	}
+
+	err = s.jobRepository.ChangeApplicationStatus(ctx, jobApplication)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

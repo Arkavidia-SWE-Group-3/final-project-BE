@@ -81,6 +81,7 @@ func (c *Config) Job() {
 		job.Get("/search", c.JobHandler.SearchJob)
 		job.Get("/applicants/:id", c.Middleware.AuthMiddleware(c.JwtService), c.Middleware.OnlyAllow("company"), c.JobHandler.GetApplicants)
 		job.Post("/apply", c.Middleware.AuthMiddleware(c.JwtService), c.Middleware.OnlyAllow("user"), c.JobHandler.ApplyJob)
+		job.Post("/update-application", c.Middleware.AuthMiddleware(c.JwtService), c.Middleware.OnlyAllow("company"), c.JobHandler.ChangeApplicationStatus)
 	}
 }
 

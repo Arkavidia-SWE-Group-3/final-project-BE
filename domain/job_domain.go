@@ -3,16 +3,18 @@ package domain
 import "mime/multipart"
 
 var (
-	MessageFailedGetJobs       = "Failed to get jobs"
-	MessageFailedSearchJobs    = "Failed to search jobs"
-	MessageFailedGetJobDetail  = "Successfully get job detail"
-	MessageFailedApplyJob      = "Failed to apply job"
-	MessageFailedGetApplicants = "Failed to get applicants"
+	MessageFailedGetJobs                 = "Failed to get jobs"
+	MessageFailedSearchJobs              = "Failed to search jobs"
+	MessageFailedGetJobDetail            = "Successfully get job detail"
+	MessageFailedApplyJob                = "Failed to apply job"
+	MessageFailedGetApplicants           = "Failed to get applicants"
+	MessageFailedChangeApplicationStatus = "Failed to change application status"
 
-	MessageSuccessSearchJobs    = "Successfully search jobs"
-	MessageSuccessGetJobDetail  = "Successfully get job detail"
-	MessageSuccessApplyJob      = "Successfully apply job"
-	MessageSuccessGetApplicants = "Successfully get applicants"
+	MessageSuccessSearchJobs              = "Successfully search jobs"
+	MessageSuccessGetJobDetail            = "Successfully get job detail"
+	MessageSuccessApplyJob                = "Successfully apply job"
+	MessageSuccessGetApplicants           = "Successfully get applicants"
+	MessageSuccessChangeApplicationStatus = "Successfully change application status"
 )
 
 type (
@@ -30,6 +32,11 @@ type (
 	JobApplyRequest struct {
 		JobID  string                `json:"job_id" form:"job_id"`
 		Resume *multipart.FileHeader `json:"resume" form:"resume"`
+	}
+
+	JobChangeApplicationStatusRequest struct {
+		JobApplicationID  string `json:"applicant_id"`
+		ApplicationStatus string `json:"status"`
 	}
 
 	JobSearchResponse struct {

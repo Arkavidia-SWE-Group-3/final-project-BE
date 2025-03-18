@@ -19,6 +19,7 @@ type (
 		GetJobDetail(c *fiber.Ctx) error
 		ApplyJob(c *fiber.Ctx) error
 		GetApplicants(c *fiber.Ctx) error
+		ChangeApplicationStatus(c *fiber.Ctx) error
 	}
 	jobHandler struct {
 		JobService job.JobService
@@ -125,4 +126,26 @@ func (h *jobHandler) GetApplicants(c *fiber.Ctx) error {
 	}
 
 	return presenters.SuccessResponse(c, res, fiber.StatusOK, domain.MessageSuccessGetApplicants)
+}
+
+func (h *jobHandler) ChangeApplicationStatus(c *fiber.Ctx) error {
+	req := new(domain.JobChangeApplicationStatusRequest)
+
+	if err := c.BodyParser(req); err != nil {
+		return presenters.ErrorResponse(c, fiber.StatusBadRequest, domain.MessageFailedChangeApplicationStatus, err)
+	}
+
+	if err := h.Validator.Struct(req); err != nil {
+		return presenters.ErrorResponse(c, fiber.StatusBadRequest, domain.MessageFailedChangeApplicationStatus, err)
+	}
+
+	userID := c.Locals("user_id").(string)
+
+	err := h.JobService.ChangeApplicationStatus(c.Context(), *req, userID)
+
+	if err != nil {
+		return presenters.ErrorResponse(c, fiber.StatusBadRequest, domain.MessageFailedChangeApplicationStatus, err)
+	}
+
+	return presenters.SuccessResponse(c, nil, fiber.StatusOK, domain.MessageSuccessChangeApplicationStatus)
 }
