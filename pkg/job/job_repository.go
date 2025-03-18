@@ -15,6 +15,7 @@ type (
 		GetJobDetail(ctx context.Context, id string) (entities.Job, error)
 		ApplyJob(ctx context.Context, jobApplication entities.JobApplication) error
 		GetApplicants(ctx context.Context, jobID uuid.UUID) ([]entities.JobApplication, error)
+		CheckCompanyIDFromJob(ctx context.Context, jobID uuid.UUID, userID uuid.UUID) error
 	}
 	jobRepository struct {
 		db *gorm.DB
@@ -23,6 +24,33 @@ type (
 
 func NewJobRepository(db *gorm.DB) JobRepository {
 	return &jobRepository{db: db}
+}
+
+func (r *jobRepository) CheckCompanyIDFromJob(ctx context.Context, jobID uuid.UUID, userID uuid.UUID) error {
+
+	var job entities.Job
+	var companyID uuid.UUID
+
+	err := r.db.WithContext(ctx).Where("id = ?", jobID).First(&job).Error
+
+	if err != nil {
+		return err
+	}
+
+	companyID = job.CompanyID
+
+	var company entities.Companies
+	err = r.db.WithContext(ctx).Where("user_id = ?", userID).First(&company).Error
+
+	if err != nil {
+		return err
+	}
+
+	if companyID != company.ID {
+		return domain.ErrCompanyNotFound
+	}
+
+	return nil
 }
 
 func (r *jobRepository) GetJobDetail(ctx context.Context, id string) (entities.Job, error) {
