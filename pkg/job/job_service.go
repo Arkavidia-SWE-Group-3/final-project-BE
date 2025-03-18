@@ -164,6 +164,18 @@ func (s *jobService) GetApplicants(ctx context.Context, jobID string, userID str
 		return nil, domain.ErrParseUUID
 	}
 
+	parsedUserID, err := uuid.Parse(userID)
+
+	if err != nil {
+		return nil, domain.ErrParseUUID
+	}
+
+	err = s.jobRepository.CheckCompanyIDFromJob(ctx, parsedJobID, parsedUserID)
+
+	if err != nil {
+		return nil, err
+	}
+
 	res, err := s.jobRepository.GetApplicants(ctx, parsedJobID)
 
 	if err != nil {

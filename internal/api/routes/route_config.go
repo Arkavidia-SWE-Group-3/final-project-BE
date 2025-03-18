@@ -33,26 +33,26 @@ func (c *Config) User() {
 		user.Post("/register", c.UserHandler.RegisterUser)
 		user.Post("/login", c.UserHandler.Login)
 		user.Get("/profile/:slug", c.UserHandler.GetProfile)
-		user.Post("/update-profile", c.Middleware.AuthMiddleware(c.JwtService), c.UserHandler.UpdateProfile)
+		user.Post("/update-profile", c.Middleware.AuthMiddleware(c.JwtService), c.Middleware.OnlyAllow("user"), c.UserHandler.UpdateProfile)
 
 		education := user.Group("/education")
 		{
-			education.Post("/add-education", c.Middleware.AuthMiddleware(c.JwtService), c.UserHandler.PostEducation)
-			education.Patch("/update-education", c.Middleware.AuthMiddleware(c.JwtService), c.UserHandler.UpdateEducation)
-			education.Delete("/delete-education/:id", c.Middleware.AuthMiddleware(c.JwtService), c.UserHandler.DeleteEducation)
+			education.Post("/add-education", c.Middleware.AuthMiddleware(c.JwtService), c.Middleware.OnlyAllow("user"), c.UserHandler.PostEducation)
+			education.Patch("/update-education", c.Middleware.AuthMiddleware(c.JwtService), c.Middleware.OnlyAllow("user"), c.UserHandler.UpdateEducation)
+			education.Delete("/delete-education/:id", c.Middleware.AuthMiddleware(c.JwtService), c.Middleware.OnlyAllow("user"), c.UserHandler.DeleteEducation)
 		}
 
 		experience := user.Group("/experience")
 		{
-			experience.Patch("/update-experience", c.Middleware.AuthMiddleware(c.JwtService), c.UserHandler.UpdateExperience)
-			experience.Post("/add-experience", c.Middleware.AuthMiddleware(c.JwtService), c.UserHandler.PostExperience)
-			experience.Delete("/delete-experience/:id", c.Middleware.AuthMiddleware(c.JwtService), c.UserHandler.DeleteExperience)
+			experience.Patch("/update-experience", c.Middleware.AuthMiddleware(c.JwtService), c.Middleware.OnlyAllow("user"), c.UserHandler.UpdateExperience)
+			experience.Post("/add-experience", c.Middleware.AuthMiddleware(c.JwtService), c.Middleware.OnlyAllow("user"), c.UserHandler.PostExperience)
+			experience.Delete("/delete-experience/:id", c.Middleware.AuthMiddleware(c.JwtService), c.Middleware.OnlyAllow("user"), c.UserHandler.DeleteExperience)
 		}
 
 		skills := user.Group("/skills")
 		{
-			skills.Post("/add-skill", c.Middleware.AuthMiddleware(c.JwtService), c.UserHandler.PostSkill)
-			skills.Delete("/delete-skill/:id", c.Middleware.AuthMiddleware(c.JwtService), c.UserHandler.DeleteSkill)
+			skills.Post("/add-skill", c.Middleware.AuthMiddleware(c.JwtService), c.Middleware.OnlyAllow("user"), c.UserHandler.PostSkill)
+			skills.Delete("/delete-skill/:id", c.Middleware.AuthMiddleware(c.JwtService), c.Middleware.OnlyAllow("user"), c.UserHandler.DeleteSkill)
 		}
 
 		user.Post("/subscribe", c.Middleware.AuthMiddleware(c.JwtService), c.MidtransHandler.CreateTransaction)
@@ -67,9 +67,9 @@ func (c *Config) Company() {
 		company.Post("/login", c.CompanyHandler.LoginCompany)
 		company.Post("/register", c.CompanyHandler.RegisterCompany)
 		company.Get("/profile/:slug", c.CompanyHandler.GetProfile)
-		company.Patch("/update-profile", c.Middleware.AuthMiddleware(c.JwtService), c.CompanyHandler.UpdateProfile)
-		company.Post("/add-job", c.Middleware.AuthMiddleware(c.JwtService), c.CompanyHandler.AddJob)
-		company.Patch("/update-job", c.Middleware.AuthMiddleware(c.JwtService), c.CompanyHandler.UpdateJob)
+		company.Patch("/update-profile", c.Middleware.AuthMiddleware(c.JwtService), c.Middleware.OnlyAllow("company"), c.CompanyHandler.UpdateProfile)
+		company.Post("/add-job", c.Middleware.AuthMiddleware(c.JwtService), c.Middleware.OnlyAllow("company"), c.CompanyHandler.AddJob)
+		company.Patch("/update-job", c.Middleware.AuthMiddleware(c.JwtService), c.Middleware.OnlyAllow("company"), c.CompanyHandler.UpdateJob)
 	}
 }
 
@@ -78,8 +78,8 @@ func (c *Config) Job() {
 	{
 		job.Get("/detail/:id", c.JobHandler.GetJobDetail)
 		job.Get("/search", c.JobHandler.SearchJob)
-		job.Get("/applicants/:id", c.Middleware.AuthMiddleware(c.JwtService), c.JobHandler.GetApplicants)
-		job.Post("/apply", c.Middleware.AuthMiddleware(c.JwtService), c.JobHandler.ApplyJob)
+		job.Get("/applicants/:id", c.Middleware.AuthMiddleware(c.JwtService), c.Middleware.OnlyAllow("company"), c.JobHandler.GetApplicants)
+		job.Post("/apply", c.Middleware.AuthMiddleware(c.JwtService), c.Middleware.OnlyAllow("user"), c.JobHandler.ApplyJob)
 	}
 }
 
