@@ -9,10 +9,12 @@ var (
 	MessageSuccessAddJob               = "Job added successfully"
 	MessageSuccessUpdateProfileCompany = "Company profile updated successfully"
 	MessageSuccessRegisterCompany      = "Company registered successfully"
+	MessageSuccessGetListCompany       = "Company profile retrieved successfully"
 
 	MessageFailedAddJob               = "Failed to add job"
 	MessageFailedUpdateProfileCompany = "Failed to update company profile"
 	MessageFailedRegisterCompany      = "Failed to register company"
+	MessageFailedGetListCompany       = "Failed to retrieve company profile"
 
 	ErrJobNotCreated            = errors.New("job not created")
 	ErrJobNotUpdated            = errors.New("job not updated")
@@ -66,6 +68,11 @@ type (
 		ID      string `json:"id"`
 		SkillID string `json:"skill_id"`
 		Name    string `json:"name"`
+	}
+
+	CompanyListResponse struct {
+		ID   string `json:"id"`
+		Name string `json:"name"`
 	}
 
 	CompanyAddJobRequest struct {

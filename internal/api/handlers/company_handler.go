@@ -20,6 +20,7 @@ type (
 		UpdateProfile(c *fiber.Ctx) error
 		RegisterCompany(c *fiber.Ctx) error
 		LoginCompany(c *fiber.Ctx) error
+		GetListCompany(c *fiber.Ctx) error
 	}
 	companyHandler struct {
 		CompanyService company.CompanyService
@@ -32,6 +33,16 @@ func NewCompanyHandler(companyService company.CompanyService, validator *validat
 		CompanyService: companyService,
 		Validator:      validator,
 	}
+}
+
+func (h *companyHandler) GetListCompany(c *fiber.Ctx) error {
+	res, err := h.CompanyService.GetListCompany(c.Context())
+
+	if err != nil {
+		return presenters.ErrorResponse(c, fiber.StatusBadRequest, domain.MessageFailedGetListCompany, err)
+	}
+
+	return presenters.SuccessResponse(c, res, fiber.StatusOK, domain.MessageSuccessGetListCompany)
 }
 
 func (h *companyHandler) LoginCompany(c *fiber.Ctx) error {

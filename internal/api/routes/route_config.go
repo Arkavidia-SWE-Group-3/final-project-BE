@@ -67,6 +67,7 @@ func (c *Config) Company() {
 		company.Post("/login", c.CompanyHandler.LoginCompany)
 		company.Post("/register", c.CompanyHandler.RegisterCompany)
 		company.Get("/profile/:slug", c.CompanyHandler.GetProfile)
+		company.Get("/list", c.CompanyHandler.GetListCompany)
 		company.Patch("/update-profile", c.Middleware.AuthMiddleware(c.JwtService), c.Middleware.OnlyAllow("company"), c.CompanyHandler.UpdateProfile)
 		company.Post("/add-job", c.Middleware.AuthMiddleware(c.JwtService), c.Middleware.OnlyAllow("company"), c.CompanyHandler.AddJob)
 		company.Patch("/update-job", c.Middleware.AuthMiddleware(c.JwtService), c.Middleware.OnlyAllow("company"), c.CompanyHandler.UpdateJob)

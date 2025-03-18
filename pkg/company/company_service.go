@@ -19,6 +19,7 @@ type (
 		UpdateProfile(ctx context.Context, req domain.CompanyUpdateProfileRequest, userID string) error
 		LoginCompany(ctx context.Context, req domain.CompanyLoginRequest) (*domain.CompanyLoginResponse, error)
 		RegisterCompany(ctx context.Context, req domain.CompanyRegisterRequest) error
+		GetListCompany(ctx context.Context) ([]domain.CompanyListResponse, error)
 	}
 
 	companyService struct {
@@ -30,6 +31,26 @@ type (
 
 func NewCompanyService(companyRepository CompanyRepository, awsS3 storage.AwsS3, jwtService jwtService.JWTService) CompanyService {
 	return &companyService{companyRepository: companyRepository, awsS3: awsS3, jwtService: jwtService}
+}
+
+func (s *companyService) GetListCompany(ctx context.Context) ([]domain.CompanyListResponse, error) {
+	companies, err := s.companyRepository.GetListCompany(ctx)
+
+	if err != nil {
+		return nil, domain.ErrCompanyNotFound
+	}
+
+	var companyListResponse []domain.CompanyListResponse
+
+	for _, company := range companies {
+		companyListResponse = append(companyListResponse, domain.CompanyListResponse{
+			ID:   company.ID.String(),
+			Name: company.Name,
+		})
+
+	}
+
+	return companyListResponse, nil
 }
 
 func (s *companyService) LoginCompany(ctx context.Context, req domain.CompanyLoginRequest) (*domain.CompanyLoginResponse, error) {
