@@ -15,10 +15,11 @@ var (
 	MessageSuccessCreateMessage  = "Successfully create message"
 	MessageSuccessGetMessages    = "Successfully get messages"
 
-	ErrFailedGetChatRoom    = errors.New("failed to get chat room")
-	ErrFailedCreateChatRoom = errors.New("failed to create chat room")
-	ErrFailedCreateMessage  = errors.New("failed to create message")
-	ErrFailedGetMessages    = errors.New("failed to get messages")
+	ErrFailedGetChatRoom      = errors.New("failed to get chat room")
+	ErrFailedCreateChatRoom   = errors.New("failed to create chat room")
+	ErrFailedCreateMessage    = errors.New("failed to create message")
+	ErrFailedGetMessages      = errors.New("failed to get messages")
+	ErrUserNotExistInChatRoom = errors.New("user not exist in chat room")
 )
 
 type (

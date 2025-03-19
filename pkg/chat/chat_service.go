@@ -117,6 +117,12 @@ func (s *chatService) SendMessage(ctx context.Context, req domain.CreateMessageR
 		return domain.ErrParseUUID
 	}
 
+	exist, err := s.chatRepository.CheckUserExistInChatRoom(ctx, parsedChatRoomID, parsedUserID)
+
+	if exist == false {
+		return domain.ErrUserNotExistInChatRoom
+	}
+
 	err = s.chatRepository.CreateMessage(ctx, entities.ChatMessage{
 		RoomID:  parsedChatRoomID,
 		UserID:  parsedUserID,
@@ -141,6 +147,12 @@ func (s *chatService) GetMessages(ctx context.Context, userID string, roomID str
 
 	if err != nil {
 		return domain.ChatRoomMessageResponse{}, domain.ErrParseUUID
+	}
+
+	exist, err := s.chatRepository.CheckUserExistInChatRoom(ctx, parsedRoomID, parsedUserID)
+
+	if exist == false {
+		return domain.ChatRoomMessageResponse{}, domain.ErrUserNotExistInChatRoom
 	}
 
 	chatRoom, err := s.chatRepository.GetChatRoomByRoomID(ctx, parsedRoomID)

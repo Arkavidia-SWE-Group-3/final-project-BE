@@ -17,6 +17,7 @@ type (
 		CreateMessage(ctx context.Context, message entities.ChatMessage) error
 		GetMessages(ctx context.Context, roomID uuid.UUID) ([]entities.ChatMessage, error)
 		GetChatRoomByRoomID(ctx context.Context, roomID uuid.UUID) (entities.ChatRoom, error)
+		CheckUserExistInChatRoom(ctx context.Context, roomID uuid.UUID, userID uuid.UUID) (bool, error)
 	}
 	chatRepository struct {
 		db *gorm.DB
@@ -71,4 +72,15 @@ func (r *chatRepository) GetMessages(ctx context.Context, roomID uuid.UUID) ([]e
 		return nil, err
 	}
 	return messages, nil
+}
+
+func (r *chatRepository) CheckUserExistInChatRoom(ctx context.Context, roomID uuid.UUID, userID uuid.UUID) (bool, error) {
+	var chatRoom entities.ChatRoom
+	if err := r.db.WithContext(ctx).Where("id = ?", roomID).First(&chatRoom).Error; err != nil {
+		return false, err
+	}
+	if chatRoom.FirstUserID == userID || chatRoom.SecondUserID == userID {
+		return true, nil
+	}
+	return false, nil
 }
