@@ -18,6 +18,7 @@ var (
 	MessageSuccessDeleteEducation      = "delete education success"
 	MessageSuccessDeleteExperience     = "delete experience success"
 	MessageSuccessAddSkill             = "add skill success"
+	MessageSuccessSearchUser           = "search user success"
 
 	MessageFailedBodyRequest      = "body request failed"
 	MessageFailedRegister         = "register failed"
@@ -30,6 +31,7 @@ var (
 	MessageFailedUpdateEducation  = "failed delete education"
 	MessageFailedDeleteEducation  = "failed delete education"
 	MessageFailedAddSkill         = "failed add skill"
+	MessageFailedSearchUser       = "failed search user"
 
 	ErrAccountAlreadyVerified = errors.New("account already verified")
 	ErrEmailAlreadyExists     = errors.New("email already exists")
@@ -48,6 +50,7 @@ var (
 	ErrPostSkill              = errors.New("add skill failed")
 	ErrDeleteSkill            = errors.New("delete skill failed")
 	ErrGetProfile             = errors.New("get profile failed")
+	ErrSearchUser             = errors.New("search user failed")
 )
 
 type (
@@ -181,5 +184,17 @@ type (
 
 	PostUserSkillRequest struct {
 		SkillID string `json:"skill_id" form:"skill_id" validate:"required"`
+	}
+
+	UserSearchRequest struct {
+		Keyword string `json:"keyword" form:"keyword"`
+	}
+
+	UserSearchResponse struct {
+		ID             string `json:"id"`
+		Name           string `json:"name"`
+		Slug           string `json:"slug"`
+		Type           string `json:"type"`
+		ProfilePicture string `json:"profile_picture"`
 	}
 )

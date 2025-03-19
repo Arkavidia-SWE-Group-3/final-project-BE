@@ -27,6 +27,7 @@ type (
 		DeleteExperience(ctx context.Context, id uuid.UUID) error
 		PostSkill(ctx context.Context, req entities.UserSkill) error
 		DeleteSkill(ctx context.Context, id uuid.UUID) error
+		SearchUser(ctx context.Context, query domain.UserSearchRequest) ([]entities.User, error)
 	}
 	userRepository struct {
 		db *gorm.DB
@@ -224,4 +225,20 @@ func (r *userRepository) DeleteSkill(ctx context.Context, id uuid.UUID) error {
 		return err
 	}
 	return nil
+}
+
+func (r *userRepository) SearchUser(ctx context.Context, query domain.UserSearchRequest) ([]entities.User, error) {
+	var users []entities.User
+
+	dbQuery := r.db.WithContext(ctx).Model(&entities.User{})
+
+	if query.Keyword != "" {
+		dbQuery = dbQuery.Where("name LIKE ?", "%"+query.Keyword+"%")
+	}
+
+	if err := dbQuery.Find(&users).Error; err != nil {
+		return nil, err
+	}
+
+	return users, nil
 }

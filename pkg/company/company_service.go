@@ -106,6 +106,7 @@ func (s *companyService) RegisterCompany(ctx context.Context, req domain.Company
 		Email:    req.Email,
 		Password: password,
 		Role:     "company",
+		Slug:     utils.CreateSlug(req.Name),
 	}
 
 	err = s.companyRepository.RegisterCompany(ctx, company, user)

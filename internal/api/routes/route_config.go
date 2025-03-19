@@ -33,6 +33,7 @@ func (c *Config) Setup() {
 func (c *Config) User() {
 	user := c.App.Group("/api/user")
 	{
+		user.Get("/search", c.UserHandler.SearchUser)
 		user.Post("/register", c.UserHandler.RegisterUser)
 		user.Post("/login", c.UserHandler.Login)
 		user.Get("/profile/:slug", c.UserHandler.GetProfile)

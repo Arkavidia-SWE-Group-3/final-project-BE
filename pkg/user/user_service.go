@@ -27,6 +27,7 @@ type (
 		DeleteExperience(ctx context.Context, experienceID string) error
 		PostSkill(ctx context.Context, req domain.PostUserSkillRequest, userID string) error
 		DeleteSkill(ctx context.Context, skillID string) error
+		SearchUser(ctx context.Context, query domain.UserSearchRequest) ([]domain.UserSearchResponse, error)
 	}
 
 	userService struct {
@@ -399,4 +400,30 @@ func (s *userService) DeleteSkill(ctx context.Context, skillID string) error {
 	}
 
 	return nil
+}
+
+func (s *userService) SearchUser(ctx context.Context, query domain.UserSearchRequest) ([]domain.UserSearchResponse, error) {
+	var usersResponse []domain.UserSearchResponse
+
+	users, err := s.userRepository.SearchUser(ctx, query)
+
+	if err != nil {
+		return nil, domain.ErrSearchUser
+	}
+
+	for _, user := range users {
+		usersResponse = append(usersResponse, domain.UserSearchResponse{
+			ID:             user.ID.String(),
+			Name:           user.Name,
+			Slug:           user.Slug,
+			Type:           user.Role,
+			ProfilePicture: user.ProfilePicture,
+		})
+	}
+
+	if usersResponse == nil {
+		usersResponse = []domain.UserSearchResponse{}
+	}
+
+	return usersResponse, nil
 }

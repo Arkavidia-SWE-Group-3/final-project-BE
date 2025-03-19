@@ -23,6 +23,7 @@ type (
 		DeleteExperience(c *fiber.Ctx) error
 		PostSkill(c *fiber.Ctx) error
 		DeleteSkill(c *fiber.Ctx) error
+		SearchUser(c *fiber.Ctx) error
 	}
 	userHandler struct {
 		UserService user.UserService
@@ -219,4 +220,16 @@ func (h *userHandler) DeleteSkill(c *fiber.Ctx) error {
 	}
 
 	return presenters.SuccessResponse(c, nil, fiber.StatusOK, domain.MessageSuccessDeleteEducation)
+}
+
+func (h *userHandler) SearchUser(c *fiber.Ctx) error {
+	query := domain.UserSearchRequest{
+		Keyword: c.Query("search"),
+	}
+
+	res, err := h.UserService.SearchUser(c.Context(), query)
+	if err != nil {
+		return presenters.ErrorResponse(c, fiber.StatusBadRequest, domain.MessageFailedSearchUser, err)
+	}
+	return presenters.SuccessResponse(c, res, fiber.StatusOK, domain.MessageSuccessSearchUser)
 }
