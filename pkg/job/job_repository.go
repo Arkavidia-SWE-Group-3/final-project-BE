@@ -140,9 +140,28 @@ func (r *jobRepository) GetApplicants(ctx context.Context, jobID uuid.UUID) ([]e
 }
 
 func (r *jobRepository) ChangeApplicationStatus(ctx context.Context, jobApplication entities.JobApplication) error {
-	err := r.db.WithContext(ctx).Model(&entities.JobApplication{}).Where("id = ?", jobApplication.ID).Updates(&jobApplication).Error
+	res := r.db.WithContext(ctx).Model(&entities.JobApplication{}).Where("id = ?", jobApplication.ID).Updates(&jobApplication)
 
-	if err != nil {
+	if res.Error != nil {
+		return res.Error
+	}
+
+	var newJobApplicationInfo entities.JobApplication
+	res = r.db.WithContext(ctx).Preload("Job.Company").Where("id = ?", jobApplication.ID).First(&newJobApplicationInfo)
+
+	if res.Error != nil {
+		return res.Error
+	}
+
+	notification := entities.Notification{
+		UserID:           newJobApplicationInfo.UserID,
+		Title:            "Job Application Status Updated",
+		Message:          "Your job application for " + newJobApplicationInfo.Job.Title + " has been updated to " + jobApplication.Status,
+		IsRead:           false,
+		NotificationType: "Job Application",
+	}
+
+	if err := r.db.WithContext(ctx).Create(&notification).Error; err != nil {
 		return err
 	}
 

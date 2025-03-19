@@ -71,6 +71,10 @@ func Migrate(db *gorm.DB) error {
 		log.Fatalf("Error migrating chat messages database: %v", err)
 	}
 
+	if err := db.AutoMigrate(&entities.Notification{}); err != nil {
+		log.Fatalf("Error migrating notifications database: %v", err)
+	}
+
 	fmt.Println("Database migration complete")
 	return nil
 }
