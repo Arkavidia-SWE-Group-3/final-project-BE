@@ -9,15 +9,16 @@ import (
 )
 
 type Config struct {
-	App               *fiber.App
-	UserHandler       handlers.UserHandler
-	CompanyHandler    handlers.CompanyHandler
-	ChatServerHandler handlers.ChatServerHandler
-	ChatHandler       handlers.ChatHandler
-	JobHandler        handlers.JobHandler
-	MidtransHandler   handlers.MidtransHandler
-	Middleware        middleware.Middleware
-	JwtService        jwtService.JWTService
+	App                 *fiber.App
+	UserHandler         handlers.UserHandler
+	CompanyHandler      handlers.CompanyHandler
+	ChatServerHandler   handlers.ChatServerHandler
+	ChatHandler         handlers.ChatHandler
+	JobHandler          handlers.JobHandler
+	NotificationHandler handlers.NotificationHandler
+	MidtransHandler     handlers.MidtransHandler
+	Middleware          middleware.Middleware
+	JwtService          jwtService.JWTService
 }
 
 func (c *Config) Setup() {
@@ -26,6 +27,7 @@ func (c *Config) Setup() {
 	c.Company()
 	c.Job()
 	c.Chat()
+	c.Notification()
 	c.GuestRoute()
 	c.AuthRoute()
 }
@@ -100,6 +102,14 @@ func (c *Config) Chat() {
 		chat.Get("/messages/:id", c.Middleware.AuthMiddleware(c.JwtService), c.ChatHandler.GetMessages)
 	}
 
+}
+
+func (c *Config) Notification() {
+	notification := c.App.Group("/api/notification")
+	{
+		notification.Get("/list", c.Middleware.AuthMiddleware(c.JwtService), c.NotificationHandler.GetNotifications)
+		notification.Post("/read/:id", c.Middleware.AuthMiddleware(c.JwtService), c.NotificationHandler.ReadNotification)
+	}
 }
 
 func (c *Config) GuestRoute() {

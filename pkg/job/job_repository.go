@@ -156,7 +156,7 @@ func (r *jobRepository) ChangeApplicationStatus(ctx context.Context, jobApplicat
 	notification := entities.Notification{
 		UserID:           newJobApplicationInfo.UserID,
 		Title:            "Job Application Status Updated",
-		Message:          "Your job application for " + newJobApplicationInfo.Job.Title + " has been updated to " + jobApplication.Status,
+		Message:          "Your job application for " + newJobApplicationInfo.Job.Title + " for " + newJobApplicationInfo.Job.Company.Name + " is " + jobApplication.Status,
 		IsRead:           false,
 		NotificationType: "Job Application",
 	}

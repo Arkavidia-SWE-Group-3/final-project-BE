@@ -11,6 +11,7 @@ import (
 	"Go-Starter-Template/pkg/job"
 	"Go-Starter-Template/pkg/jwt"
 	"Go-Starter-Template/pkg/midtrans"
+	"Go-Starter-Template/pkg/notification"
 	"Go-Starter-Template/pkg/user"
 	"os"
 	"path/filepath"
@@ -61,6 +62,7 @@ func NewApp(db *gorm.DB) (*fiber.App, error) {
 	midtransRepository := midtrans.NewMidtransRepository(db)
 	jobRepository := job.NewJobRepository(db)
 	chatRepository := chat.NewChatRepository(db)
+	notificationRepository := notification.NewNotificationRepository(db)
 
 	// Service
 	userService := user.NewUserService(userRepository, awsS3, jwtService)
@@ -71,6 +73,7 @@ func NewApp(db *gorm.DB) (*fiber.App, error) {
 	)
 	jobService := job.NewJobService(jobRepository, awsS3, jwtService)
 	chatService := chat.NewChatService(chatRepository, jwtService)
+	notificationService := notification.NewNotificationService(notificationRepository, jwtService)
 
 	// Handler
 	userHandler := handlers.NewUserHandler(userService, validator)
@@ -79,18 +82,20 @@ func NewApp(db *gorm.DB) (*fiber.App, error) {
 	jobHandler := handlers.NewJobHandler(jobService, validator)
 	chatServerHandler := handlers.NewChatServerHandler()
 	chatHandler := handlers.NewChatHandler(chatService, validator)
+	notificationHandler := handlers.NewNotificationHandler(notificationService, validator)
 
 	// routes
 	routesConfig := routes.Config{
-		App:               app,
-		UserHandler:       userHandler,
-		CompanyHandler:    companyHandler,
-		MidtransHandler:   midtransHandler,
-		Middleware:        middlewares,
-		JwtService:        jwtService,
-		JobHandler:        jobHandler,
-		ChatServerHandler: *chatServerHandler,
-		ChatHandler:       chatHandler,
+		App:                 app,
+		UserHandler:         userHandler,
+		CompanyHandler:      companyHandler,
+		MidtransHandler:     midtransHandler,
+		Middleware:          middlewares,
+		JwtService:          jwtService,
+		JobHandler:          jobHandler,
+		ChatServerHandler:   *chatServerHandler,
+		ChatHandler:         chatHandler,
+		NotificationHandler: notificationHandler,
 	}
 
 	routesConfig.Setup()
