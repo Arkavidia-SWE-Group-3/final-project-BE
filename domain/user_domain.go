@@ -196,5 +196,6 @@ type (
 		Slug           string `json:"slug"`
 		Type           string `json:"type"`
 		ProfilePicture string `json:"profile_picture"`
+		Headline       string `json:"headline"`
 	}
 )

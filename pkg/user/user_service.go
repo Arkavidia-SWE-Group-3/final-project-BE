@@ -418,6 +418,7 @@ func (s *userService) SearchUser(ctx context.Context, query domain.UserSearchReq
 			Slug:           user.Slug,
 			Type:           user.Role,
 			ProfilePicture: user.ProfilePicture,
+			Headline:       user.CurrentTitle,
 		})
 	}
 

@@ -224,7 +224,7 @@ func (h *userHandler) DeleteSkill(c *fiber.Ctx) error {
 
 func (h *userHandler) SearchUser(c *fiber.Ctx) error {
 	query := domain.UserSearchRequest{
-		Keyword: c.Query("search"),
+		Keyword: c.Query("keyword"),
 	}
 
 	res, err := h.UserService.SearchUser(c.Context(), query)

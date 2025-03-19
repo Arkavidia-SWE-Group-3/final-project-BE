@@ -233,7 +233,7 @@ func (r *userRepository) SearchUser(ctx context.Context, query domain.UserSearch
 	dbQuery := r.db.WithContext(ctx).Model(&entities.User{})
 
 	if query.Keyword != "" {
-		dbQuery = dbQuery.Where("name LIKE ?", "%"+query.Keyword+"%")
+		dbQuery = dbQuery.Where("name ILIKE ?", "%"+query.Keyword+"%")
 	}
 
 	if err := dbQuery.Find(&users).Error; err != nil {
