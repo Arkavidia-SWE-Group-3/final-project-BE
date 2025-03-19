@@ -59,6 +59,7 @@ type (
 	}
 
 	UserPersonalInfoResponse struct {
+		ID             string `json:"id"`
 		Name           string `json:"name"`
 		About          string `json:"about"`
 		Address        string `json:"location"`

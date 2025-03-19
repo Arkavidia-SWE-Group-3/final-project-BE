@@ -147,6 +147,7 @@ func (r *userRepository) GetProfile(ctx context.Context, slug string) (domain.Us
 
 	return domain.UserProfileResponse{
 		PersonalInfo: domain.UserPersonalInfoResponse{
+			ID:             user.ID.String(),
 			Name:           user.Name,
 			About:          user.About,
 			Address:        user.Address,
