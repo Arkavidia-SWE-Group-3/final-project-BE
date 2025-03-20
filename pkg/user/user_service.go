@@ -27,6 +27,7 @@ type (
 		DeleteExperience(ctx context.Context, experienceID string) error
 		PostSkill(ctx context.Context, req domain.PostUserSkillRequest, userID string) error
 		DeleteSkill(ctx context.Context, skillID string) error
+		GetSkills(ctx context.Context) ([]domain.SkillsResponse, error)
 		SearchUser(ctx context.Context, query domain.UserSearchRequest) ([]domain.UserSearchResponse, error)
 	}
 
@@ -427,4 +428,28 @@ func (s *userService) SearchUser(ctx context.Context, query domain.UserSearchReq
 	}
 
 	return usersResponse, nil
+}
+
+func (s *userService) GetSkills(ctx context.Context) ([]domain.SkillsResponse, error) {
+	var skillsResponse []domain.SkillsResponse
+
+	skills, err := s.userRepository.GetSkills(ctx)
+
+	if err != nil {
+		return nil, domain.ErrGetSkills
+	}
+
+	for _, skill := range skills {
+		skillsResponse = append(skillsResponse, domain.SkillsResponse{
+			ID:   skill.ID.String(),
+			Name: skill.Name,
+		})
+	}
+
+	if skillsResponse == nil {
+		skillsResponse = []domain.SkillsResponse{}
+	}
+
+	return skillsResponse, nil
+
 }

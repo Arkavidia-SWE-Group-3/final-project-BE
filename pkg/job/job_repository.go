@@ -57,7 +57,7 @@ func (r *jobRepository) CheckCompanyIDFromJob(ctx context.Context, jobID uuid.UU
 
 func (r *jobRepository) GetJobDetail(ctx context.Context, id string) (entities.Job, error) {
 	var job entities.Job
-	err := r.db.WithContext(ctx).Preload("Company").Preload("Skills").Where("id = ?", id).First(&job).Error
+	err := r.db.WithContext(ctx).Preload("Company.User").Preload("Skills").Where("id = ?", id).First(&job).Error
 
 	if err != nil {
 		return entities.Job{}, err
@@ -69,7 +69,7 @@ func (r *jobRepository) GetJobDetail(ctx context.Context, id string) (entities.J
 func (r *jobRepository) SearchJob(ctx context.Context, filters domain.JobSearchRequest) ([]entities.Job, error) {
 
 	var jobs []entities.Job
-	query := r.db.WithContext(ctx).Preload("Company").Preload("Skills").Model(&entities.Job{})
+	query := r.db.WithContext(ctx).Preload("Company.User").Preload("Skills").Model(&entities.Job{})
 
 	if filters.Title != "" {
 		query = query.Where("title ILIKE ?", "%"+filters.Title+"%")

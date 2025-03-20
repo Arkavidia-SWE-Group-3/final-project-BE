@@ -24,6 +24,7 @@ type (
 		PostSkill(c *fiber.Ctx) error
 		DeleteSkill(c *fiber.Ctx) error
 		SearchUser(c *fiber.Ctx) error
+		GetSkills(c *fiber.Ctx) error
 	}
 	userHandler struct {
 		UserService user.UserService
@@ -232,4 +233,12 @@ func (h *userHandler) SearchUser(c *fiber.Ctx) error {
 		return presenters.ErrorResponse(c, fiber.StatusBadRequest, domain.MessageFailedSearchUser, err)
 	}
 	return presenters.SuccessResponse(c, res, fiber.StatusOK, domain.MessageSuccessSearchUser)
+}
+
+func (h *userHandler) GetSkills(c *fiber.Ctx) error {
+	res, err := h.UserService.GetSkills(c.Context())
+	if err != nil {
+		return presenters.ErrorResponse(c, fiber.StatusBadRequest, domain.MessageFailedGetSkills, err)
+	}
+	return presenters.SuccessResponse(c, res, fiber.StatusOK, domain.MessageSuccessGetSkills)
 }

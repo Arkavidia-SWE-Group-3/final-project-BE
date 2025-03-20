@@ -29,7 +29,6 @@ func (c *Config) Setup() {
 	c.Job()
 	c.Chat()
 	c.Post()
-
 	c.Notification()
 	c.GuestRoute()
 	c.AuthRoute()
@@ -60,12 +59,17 @@ func (c *Config) User() {
 
 		skills := user.Group("/skills")
 		{
+
 			skills.Post("/add-skill", c.Middleware.AuthMiddleware(c.JwtService), c.Middleware.OnlyAllow("user"), c.UserHandler.PostSkill)
 			skills.Delete("/delete-skill/:id", c.Middleware.AuthMiddleware(c.JwtService), c.Middleware.OnlyAllow("user"), c.UserHandler.DeleteSkill)
 		}
 
 		user.Post("/subscribe", c.Middleware.AuthMiddleware(c.JwtService), c.MidtransHandler.CreateTransaction)
+	}
 
+	skills := c.App.Group("/api/skill")
+	{
+		skills.Get("/list", c.UserHandler.GetSkills)
 	}
 
 }

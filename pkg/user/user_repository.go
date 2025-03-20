@@ -28,6 +28,7 @@ type (
 		PostSkill(ctx context.Context, req entities.UserSkill) error
 		DeleteSkill(ctx context.Context, id uuid.UUID) error
 		SearchUser(ctx context.Context, query domain.UserSearchRequest) ([]entities.User, error)
+		GetSkills(ctx context.Context) ([]entities.Skill, error)
 	}
 	userRepository struct {
 		db *gorm.DB
@@ -262,4 +263,12 @@ func (r *userRepository) SearchUser(ctx context.Context, query domain.UserSearch
 	}
 
 	return users, nil
+}
+
+func (r *userRepository) GetSkills(ctx context.Context) ([]entities.Skill, error) {
+	var skills []entities.Skill
+	if err := r.db.WithContext(ctx).Find(&skills).Error; err != nil {
+		return nil, err
+	}
+	return skills, nil
 }
