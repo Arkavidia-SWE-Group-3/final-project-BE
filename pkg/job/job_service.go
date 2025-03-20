@@ -39,6 +39,10 @@ func (s *jobService) GetJobDetail(ctx context.Context, id string) (domain.JobDet
 	var jobSkills []string
 
 	for _, skill := range res.Skills {
+		if !skill.DeletedAt.Valid {
+			continue
+		}
+
 		jobSkills = append(jobSkills, skill.Name)
 	}
 
@@ -84,6 +88,10 @@ func (s *jobService) SearchJob(ctx context.Context, jobFilters domain.JobSearchR
 		var jobSkills []string
 
 		for _, skill := range job.Skills {
+			if !skill.DeletedAt.Valid {
+				continue
+			}
+
 			jobSkills = append(jobSkills, skill.Name)
 		}
 
