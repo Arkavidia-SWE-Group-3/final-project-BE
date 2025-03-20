@@ -90,6 +90,7 @@ func (s *postService) UpdatePost(ctx context.Context, req domain.UpdatePostReque
 		ID:      parsedPostID,
 		UserID:  parsedUserID,
 		Content: req.Content,
+		Asset:   post.Asset,
 	}
 
 	if req.Asset != nil {
