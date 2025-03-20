@@ -12,6 +12,7 @@ import (
 	"Go-Starter-Template/pkg/jwt"
 	"Go-Starter-Template/pkg/midtrans"
 	"Go-Starter-Template/pkg/notification"
+	"Go-Starter-Template/pkg/post"
 	"Go-Starter-Template/pkg/user"
 	"os"
 	"path/filepath"
@@ -63,6 +64,7 @@ func NewApp(db *gorm.DB) (*fiber.App, error) {
 	jobRepository := job.NewJobRepository(db)
 	chatRepository := chat.NewChatRepository(db)
 	notificationRepository := notification.NewNotificationRepository(db)
+	postRepository := post.NewPostRepository(db)
 
 	// Service
 	userService := user.NewUserService(userRepository, awsS3, jwtService)
@@ -74,6 +76,7 @@ func NewApp(db *gorm.DB) (*fiber.App, error) {
 	jobService := job.NewJobService(jobRepository, awsS3, jwtService)
 	chatService := chat.NewChatService(chatRepository, jwtService)
 	notificationService := notification.NewNotificationService(notificationRepository, jwtService)
+	postService := post.NewPostService(postRepository, jwtService)
 
 	// Handler
 	userHandler := handlers.NewUserHandler(userService, validator)
@@ -83,6 +86,7 @@ func NewApp(db *gorm.DB) (*fiber.App, error) {
 	chatServerHandler := handlers.NewChatServerHandler()
 	chatHandler := handlers.NewChatHandler(chatService, validator)
 	notificationHandler := handlers.NewNotificationHandler(notificationService, validator)
+	postHandler := handlers.NewPostHandler(postService, validator)
 
 	// routes
 	routesConfig := routes.Config{
@@ -96,6 +100,7 @@ func NewApp(db *gorm.DB) (*fiber.App, error) {
 		ChatServerHandler:   *chatServerHandler,
 		ChatHandler:         chatHandler,
 		NotificationHandler: notificationHandler,
+		PostHandler:         postHandler,
 	}
 
 	routesConfig.Setup()

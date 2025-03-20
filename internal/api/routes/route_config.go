@@ -19,6 +19,7 @@ type Config struct {
 	MidtransHandler     handlers.MidtransHandler
 	Middleware          middleware.Middleware
 	JwtService          jwtService.JWTService
+	PostHandler         handlers.PostHandler
 }
 
 func (c *Config) Setup() {
@@ -27,6 +28,7 @@ func (c *Config) Setup() {
 	c.Company()
 	c.Job()
 	c.Chat()
+
 	c.Notification()
 	c.GuestRoute()
 	c.AuthRoute()
@@ -109,6 +111,17 @@ func (c *Config) Notification() {
 	{
 		notification.Get("/list", c.Middleware.AuthMiddleware(c.JwtService), c.NotificationHandler.GetNotifications)
 		notification.Post("/read/:id", c.Middleware.AuthMiddleware(c.JwtService), c.NotificationHandler.ReadNotification)
+	}
+}
+
+func (c *Config) Post() {
+	post := c.App.Group("/api/post")
+	{
+		post.Get("/feed", c.PostHandler.GetFeed)
+		post.Get("/list", c.PostHandler.GetPosts)
+		post.Post("/create", c.Middleware.AuthMiddleware(c.JwtService), c.Middleware.OnlyAllow("user"), c.PostHandler.CreatePost)
+		post.Patch("/update/:id", c.Middleware.AuthMiddleware(c.JwtService), c.Middleware.OnlyAllow("user"), c.PostHandler.UpdatePost)
+		post.Delete("/delete/:id", c.Middleware.AuthMiddleware(c.JwtService), c.Middleware.OnlyAllow("user"), c.PostHandler.DeletePost)
 	}
 }
 
