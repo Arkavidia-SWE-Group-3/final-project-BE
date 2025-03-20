@@ -26,8 +26,19 @@ var (
 
 type (
 	CompanyProfileResponse struct {
-		CompanyInfo CompanyInfoResponse   `json:"company_info"`
-		ComapnyJobs []CompanyJobsResponse `json:"company_jobs"`
+		CompanyInfo  CompanyInfoResponse    `json:"company_info"`
+		ComapnyJobs  []CompanyJobsResponse  `json:"company_jobs"`
+		CompanyPosts []CompanyPostsResponse `json:"company_posts"`
+	}
+
+	CompanyPostsResponse struct {
+		ID             string `json:"id"`
+		Name           string `json:"name"`
+		ProfilePicture string `json:"profile_picture"`
+		Content        string `json:"content"`
+		CreatedAt      string `json:"created_at"`
+		Headline       string `json:"headline"`
+		Asset          string `json:"asset"`
 	}
 
 	CompanyInfoResponse struct {

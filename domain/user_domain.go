@@ -66,9 +66,10 @@ type (
 		ID             string `json:"id"`
 		Name           string `json:"name"`
 		ProfilePicture string `json:"profile_picture"`
-		CurrentTitle   string `json:"current_title"`
+		CurrentTitle   string `json:"headline"`
 		Content        string `json:"content"`
 		CreatedAt      string `json:"created_at"`
+		Asset          string `json:"asset"`
 	}
 
 	UserPersonalInfoResponse struct {

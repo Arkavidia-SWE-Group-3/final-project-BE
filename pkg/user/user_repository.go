@@ -160,6 +160,7 @@ func (r *userRepository) GetProfile(ctx context.Context, slug string) (domain.Us
 			CurrentTitle:   user.CurrentTitle,
 			Content:        post.Content,
 			CreatedAt:      utils.ConvertTimeToString(post.CreatedAt),
+			Asset:          post.Asset,
 		}
 	}
 

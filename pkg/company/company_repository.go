@@ -21,6 +21,7 @@ type (
 		RegisterCompany(ctx context.Context, company entities.Companies, user entities.User) error
 		GetCompanyByEmail(ctx context.Context, email string) (entities.User, entities.Companies, error)
 		GetCompanyByUserID(ctx context.Context, userID uuid.UUID) (entities.Companies, error)
+		GetPostsByCompanyID(ctx context.Context, companyID uuid.UUID) ([]entities.Post, error)
 		GetListCompany(ctx context.Context) ([]entities.Companies, error)
 	}
 	companyRepository struct {
@@ -112,6 +113,15 @@ func (r *companyRepository) GetJobsByCompanyID(ctx context.Context, companyID uu
 		return nil, err
 	}
 	return jobs, nil
+}
+
+func (r *companyRepository) GetPostsByCompanyID(ctx context.Context, companyID uuid.UUID) ([]entities.Post, error) {
+	var posts []entities.Post
+
+	if err := r.db.WithContext(ctx).Preload("User").Where("user_id = ?", companyID).Find(&posts).Error; err != nil {
+		return nil, err
+	}
+	return posts, nil
 }
 
 func (r *companyRepository) GetJobSkillsByJobID(ctx context.Context, jobID uuid.UUID) ([]entities.JobSkill, error) {

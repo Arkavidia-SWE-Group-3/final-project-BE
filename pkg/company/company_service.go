@@ -7,6 +7,7 @@ import (
 	"Go-Starter-Template/internal/utils/storage"
 	jwtService "Go-Starter-Template/pkg/jwt"
 	"context"
+	"fmt"
 
 	"github.com/google/uuid"
 )
@@ -129,6 +130,12 @@ func (s *companyService) GetProfile(ctx context.Context, slug string) (*domain.C
 		return nil, err
 	}
 
+	companyPosts, err := s.companyRepository.GetPostsByCompanyID(ctx, company.UserID)
+
+	if err != nil {
+		return nil, err
+	}
+
 	companyInfoResponse := domain.CompanyInfoResponse{
 		ID:       company.ID.String(),
 		Name:     company.Name,
@@ -176,12 +183,32 @@ func (s *companyService) GetProfile(ctx context.Context, slug string) (*domain.C
 
 	if companyJobsResponse == nil {
 		companyJobsResponse = []domain.CompanyJobsResponse{}
+	}
 
+	//Print posts
+	fmt.Print(companyPosts)
+
+	var companyPostsResponse []domain.CompanyPostsResponse
+	for _, post := range companyPosts {
+		companyPostsResponse = append(companyPostsResponse, domain.CompanyPostsResponse{
+			ID:             post.ID.String(),
+			Name:           post.User.Name,
+			ProfilePicture: post.User.ProfilePicture,
+			Content:        post.Content,
+			CreatedAt:      utils.ConvertTimeToString(post.CreatedAt),
+			Headline:       post.User.Headline,
+			Asset:          post.Asset,
+		})
+	}
+
+	if companyPostsResponse == nil {
+		companyPostsResponse = []domain.CompanyPostsResponse{}
 	}
 
 	return &domain.CompanyProfileResponse{
-		CompanyInfo: companyInfoResponse,
-		ComapnyJobs: companyJobsResponse,
+		CompanyInfo:  companyInfoResponse,
+		ComapnyJobs:  companyJobsResponse,
+		CompanyPosts: companyPostsResponse,
 	}, nil
 }
 
