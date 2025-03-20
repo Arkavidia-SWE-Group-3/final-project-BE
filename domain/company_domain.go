@@ -39,6 +39,8 @@ type (
 		CreatedAt      string `json:"created_at"`
 		Headline       string `json:"headline"`
 		Asset          string `json:"asset"`
+		Slug           string `json:"slug"`
+		Type           string `json:"type"`
 	}
 
 	CompanyInfoResponse struct {

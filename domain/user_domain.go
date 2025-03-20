@@ -70,6 +70,8 @@ type (
 		Content        string `json:"content"`
 		CreatedAt      string `json:"created_at"`
 		Asset          string `json:"asset"`
+		Slug           string `json:"slug"`
+		Type           string `json:"type"`
 	}
 
 	UserPersonalInfoResponse struct {

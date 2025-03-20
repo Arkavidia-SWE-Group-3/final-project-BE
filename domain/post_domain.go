@@ -43,5 +43,7 @@ type (
 		Content        string `json:"content"`
 		Asset          string `json:"asset"`
 		CreatedAt      string `json:"created_at"`
+		Slug           string `json:"slug"`
+		Type           string `json:"type"`
 	}
 )

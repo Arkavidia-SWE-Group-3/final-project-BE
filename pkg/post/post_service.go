@@ -163,6 +163,8 @@ func (s *postService) GetFeed(ctx context.Context) ([]domain.PostResponse, error
 			Content:        post.Content,
 			Asset:          post.Asset,
 			CreatedAt:      utils.ConvertTimeToString(post.CreatedAt),
+			Slug:           post.User.Slug,
+			Type:           post.User.Role,
 		})
 	}
 

@@ -7,7 +7,6 @@ import (
 	"Go-Starter-Template/internal/utils/storage"
 	jwtService "Go-Starter-Template/pkg/jwt"
 	"context"
-	"fmt"
 
 	"github.com/google/uuid"
 )
@@ -185,9 +184,6 @@ func (s *companyService) GetProfile(ctx context.Context, slug string) (*domain.C
 		companyJobsResponse = []domain.CompanyJobsResponse{}
 	}
 
-	//Print posts
-	fmt.Print(companyPosts)
-
 	var companyPostsResponse []domain.CompanyPostsResponse
 	for _, post := range companyPosts {
 		companyPostsResponse = append(companyPostsResponse, domain.CompanyPostsResponse{
@@ -198,6 +194,8 @@ func (s *companyService) GetProfile(ctx context.Context, slug string) (*domain.C
 			CreatedAt:      utils.ConvertTimeToString(post.CreatedAt),
 			Headline:       post.User.Headline,
 			Asset:          post.Asset,
+			Slug:           company.Slug,
+			Type:           post.User.Role,
 		})
 	}
 
