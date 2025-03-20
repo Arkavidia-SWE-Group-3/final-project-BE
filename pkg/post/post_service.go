@@ -46,7 +46,7 @@ func (s *postService) CreatePost(ctx context.Context, req domain.CreatePostReque
 	allowedMimetype := []string{"image/jpeg", "image/jpg", "image/png"}
 
 	if req.Asset != nil {
-		objectKey, err := s.awsS3.UploadFile(utils.GenerateRandomFileName(req.Content), req.Asset, "posts", allowedMimetype...)
+		objectKey, err := s.awsS3.UploadFile(utils.GenerateRandomFileName(userID), req.Asset, "posts", allowedMimetype...)
 		if err != nil {
 			return domain.ErrUploadFile
 		}
