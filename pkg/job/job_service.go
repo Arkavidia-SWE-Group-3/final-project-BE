@@ -39,7 +39,16 @@ func (s *jobService) GetJobDetail(ctx context.Context, id string) (domain.JobDet
 	var jobSkills []string
 
 	for _, skill := range res.Skills {
-		if skill.DeletedAt.Valid {
+		exist := false
+
+		for _, jobSkill := range jobSkills {
+			if jobSkill == skill.Name {
+				exist = true
+				break
+			}
+		}
+
+		if exist {
 			continue
 		}
 
@@ -88,7 +97,16 @@ func (s *jobService) SearchJob(ctx context.Context, jobFilters domain.JobSearchR
 		var jobSkills []string
 
 		for _, skill := range job.Skills {
-			if skill.DeletedAt.Valid {
+			exist := false
+
+			for _, jobSkill := range jobSkills {
+				if jobSkill == skill.Name {
+					exist = true
+					break
+				}
+			}
+
+			if exist {
 				continue
 			}
 
