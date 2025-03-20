@@ -103,7 +103,7 @@ func (r *userRepository) GetProfile(ctx context.Context, slug string) (domain.Us
 		return domain.UserProfileResponse{}, err
 	}
 
-	if err := r.db.WithContext(ctx).Find(&posts, "user_id = ?", user.ID).Error; err != nil {
+	if err := r.db.WithContext(ctx).Order("created_at desc").Find(&posts, "user_id = ?", user.ID).Error; err != nil {
 		return domain.UserProfileResponse{}, err
 	}
 

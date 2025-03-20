@@ -118,7 +118,7 @@ func (r *companyRepository) GetJobsByCompanyID(ctx context.Context, companyID uu
 func (r *companyRepository) GetPostsByCompanyID(ctx context.Context, companyID uuid.UUID) ([]entities.Post, error) {
 	var posts []entities.Post
 
-	if err := r.db.WithContext(ctx).Preload("User").Where("user_id = ?", companyID).Find(&posts).Error; err != nil {
+	if err := r.db.WithContext(ctx).Preload("User").Order("created_at desc").Where("user_id = ?", companyID).Find(&posts).Error; err != nil {
 		return nil, err
 	}
 	return posts, nil
