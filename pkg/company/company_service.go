@@ -192,7 +192,7 @@ func (s *companyService) GetProfile(ctx context.Context, slug string) (*domain.C
 			ProfilePicture: post.User.ProfilePicture,
 			Content:        post.Content,
 			CreatedAt:      utils.ConvertTimeToString(post.CreatedAt),
-			Headline:       post.User.Headline,
+			Headline:       post.User.CurrentTitle,
 			Asset:          post.Asset,
 			Slug:           company.Slug,
 			Type:           post.User.Role,
