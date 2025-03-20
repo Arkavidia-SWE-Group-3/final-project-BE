@@ -17,6 +17,7 @@ type (
 		CreatePost(c *fiber.Ctx) error
 		UpdatePost(c *fiber.Ctx) error
 		DeletePost(c *fiber.Ctx) error
+		GetFeed(c *fiber.Ctx) error
 	}
 	postHandler struct {
 		PostService post.PostService
@@ -88,4 +89,14 @@ func (h *postHandler) DeletePost(c *fiber.Ctx) error {
 	}
 
 	return presenters.SuccessResponse(c, nil, fiber.StatusOK, domain.MessageSuccessDeletePost)
+}
+
+func (h *postHandler) GetFeed(c *fiber.Ctx) error {
+	posts, err := h.PostService.GetFeed(c.Context())
+
+	if err != nil {
+		return presenters.ErrorResponse(c, fiber.StatusBadRequest, domain.MessageFailedGetFeed, err)
+	}
+
+	return presenters.SuccessResponse(c, posts, fiber.StatusOK, domain.MessageSuccessGetFeed)
 }

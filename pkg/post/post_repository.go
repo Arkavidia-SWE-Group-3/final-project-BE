@@ -14,6 +14,7 @@ type (
 		UpdatePost(ctx context.Context, post entities.Post) error
 		DeletePost(ctx context.Context, postID uuid.UUID) error
 		GetPostByID(ctx context.Context, postID uuid.UUID) (entities.Post, error)
+		GetFeed(ctx context.Context) ([]entities.Post, error)
 	}
 
 	postRepository struct {
@@ -53,4 +54,12 @@ func (r *postRepository) GetPostByID(ctx context.Context, postID uuid.UUID) (ent
 		return entities.Post{}, err
 	}
 	return post, nil
+}
+
+func (r *postRepository) GetFeed(ctx context.Context) ([]entities.Post, error) {
+	var posts []entities.Post
+	if err := r.db.WithContext(ctx).Preload("User").Order("created_at desc").Find(&posts).Error; err != nil {
+		return nil, err
+	}
+	return posts, nil
 }

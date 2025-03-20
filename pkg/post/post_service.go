@@ -17,6 +17,7 @@ type (
 		CreatePost(ctx context.Context, req domain.CreatePostRequest, userID string) error
 		UpdatePost(ctx context.Context, req domain.UpdatePostRequest, userID string) error
 		DeletePost(ctx context.Context, postID string, userID string) error
+		GetFeed(ctx context.Context) ([]domain.PostResponse, error)
 	}
 
 	postService struct {
@@ -141,4 +142,32 @@ func (s *postService) DeletePost(ctx context.Context, postID string, userID stri
 	}
 
 	return nil
+}
+
+func (s *postService) GetFeed(ctx context.Context) ([]domain.PostResponse, error) {
+
+	posts, err := s.postRepository.GetFeed(ctx)
+
+	if err != nil {
+		return nil, domain.ErrGetFeed
+	}
+
+	var postResponses []domain.PostResponse
+
+	for _, post := range posts {
+		postResponses = append(postResponses, domain.PostResponse{
+			ID:             post.ID.String(),
+			Name:           post.User.Name,
+			Headline:       post.User.CurrentTitle,
+			ProfilePicture: post.User.ProfilePicture,
+			Content:        post.Content,
+			Asset:          post.Asset,
+		})
+	}
+
+	if postResponses == nil {
+		return []domain.PostResponse{}, nil
+	}
+
+	return postResponses, nil
 }
