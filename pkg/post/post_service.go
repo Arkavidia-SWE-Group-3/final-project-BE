@@ -162,6 +162,7 @@ func (s *postService) GetFeed(ctx context.Context) ([]domain.PostResponse, error
 			ProfilePicture: post.User.ProfilePicture,
 			Content:        post.Content,
 			Asset:          post.Asset,
+			CreatedAt:      utils.ConvertTimeToString(post.CreatedAt),
 		})
 	}
 

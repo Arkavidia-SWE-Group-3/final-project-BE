@@ -42,5 +42,6 @@ type (
 		ProfilePicture string `json:"profile_picture"`
 		Content        string `json:"content"`
 		Asset          string `json:"asset"`
+		CreatedAt      string `json:"created_at"`
 	}
 )
