@@ -28,6 +28,7 @@ func (c *Config) Setup() {
 	c.Company()
 	c.Job()
 	c.Chat()
+	c.Post()
 
 	c.Notification()
 	c.GuestRoute()
@@ -117,11 +118,10 @@ func (c *Config) Notification() {
 func (c *Config) Post() {
 	post := c.App.Group("/api/post")
 	{
-		post.Get("/feed", c.PostHandler.GetFeed)
-		post.Get("/list", c.PostHandler.GetPosts)
-		post.Post("/create", c.Middleware.AuthMiddleware(c.JwtService), c.Middleware.OnlyAllow("user"), c.PostHandler.CreatePost)
-		post.Patch("/update/:id", c.Middleware.AuthMiddleware(c.JwtService), c.Middleware.OnlyAllow("user"), c.PostHandler.UpdatePost)
-		post.Delete("/delete/:id", c.Middleware.AuthMiddleware(c.JwtService), c.Middleware.OnlyAllow("user"), c.PostHandler.DeletePost)
+		// post.Get("/feed", c.PostHandler.GetFeed)
+		post.Post("/create", c.Middleware.AuthMiddleware(c.JwtService), c.PostHandler.CreatePost)
+		post.Patch("/update", c.Middleware.AuthMiddleware(c.JwtService), c.PostHandler.UpdatePost)
+		post.Delete("/delete/:id", c.Middleware.AuthMiddleware(c.JwtService), c.PostHandler.DeletePost)
 	}
 }
 
