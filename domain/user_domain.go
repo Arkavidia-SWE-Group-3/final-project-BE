@@ -59,6 +59,16 @@ type (
 		Educations   []UserEducationsResponse  `json:"educations"`
 		Experiences  []UserExperiencesResponse `json:"experiences"`
 		Skills       []UserSkillsResponse      `json:"skills"`
+		Posts        []UserPostsResponse       `json:"posts"`
+	}
+
+	UserPostsResponse struct {
+		ID             string `json:"id"`
+		Name           string `json:"name"`
+		ProfilePicture string `json:"profile_picture"`
+		CurrentTitle   string `json:"current_title"`
+		Content        string `json:"content"`
+		CreatedAt      string `json:"created_at"`
 	}
 
 	UserPersonalInfoResponse struct {

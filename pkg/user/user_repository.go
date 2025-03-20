@@ -89,6 +89,7 @@ func (r *userRepository) UpdateSubscriptionStatus(ctx context.Context, userID st
 func (r *userRepository) GetProfile(ctx context.Context, slug string) (domain.UserProfileResponse, error) {
 	var user entities.User
 	var education []entities.UserEducation
+	var posts []entities.Post
 	var experience []entities.UserExperience
 	var skill []entities.UserSkill
 
@@ -99,6 +100,10 @@ func (r *userRepository) GetProfile(ctx context.Context, slug string) (domain.Us
 	}
 
 	if err := r.db.WithContext(ctx).Find(&education, "user_id = ?", user.ID).Error; err != nil {
+		return domain.UserProfileResponse{}, err
+	}
+
+	if err := r.db.WithContext(ctx).Find(&posts, "user_id = ?", user.ID).Error; err != nil {
 		return domain.UserProfileResponse{}, err
 	}
 
@@ -146,6 +151,18 @@ func (r *userRepository) GetProfile(ctx context.Context, slug string) (domain.Us
 		}
 	}
 
+	formattedPosts := make([]domain.UserPostsResponse, len(posts))
+	for i, post := range posts {
+		formattedPosts[i] = domain.UserPostsResponse{
+			ID:             post.ID.String(),
+			Name:           user.Name,
+			ProfilePicture: user.ProfilePicture,
+			CurrentTitle:   user.CurrentTitle,
+			Content:        post.Content,
+			CreatedAt:      utils.ConvertTimeToString(post.CreatedAt),
+		}
+	}
+
 	return domain.UserProfileResponse{
 		PersonalInfo: domain.UserPersonalInfoResponse{
 			ID:             user.ID.String(),
@@ -159,6 +176,7 @@ func (r *userRepository) GetProfile(ctx context.Context, slug string) (domain.Us
 		Educations:  formattedEducations,
 		Experiences: formattedExperiences,
 		Skills:      formattedSkills,
+		Posts:       formattedPosts,
 	}, nil
 }
 
