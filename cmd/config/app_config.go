@@ -73,7 +73,7 @@ func NewApp(db *gorm.DB) (*fiber.App, error) {
 		midtransRepository,
 		userRepository,
 	)
-	jobService := job.NewJobService(jobRepository, awsS3, jwtService)
+	jobService := job.NewJobService(jobRepository, notificationRepository, awsS3, jwtService)
 	chatService := chat.NewChatService(chatRepository, jwtService)
 	notificationService := notification.NewNotificationService(notificationRepository, jwtService)
 	postService := post.NewPostService(postRepository, awsS3, jwtService)

@@ -18,6 +18,7 @@ type (
 		CheckCompanyIDFromJob(ctx context.Context, jobID uuid.UUID, userID uuid.UUID) error
 		ChangeApplicationStatus(ctx context.Context, jobApplication entities.JobApplication) error
 		CheckCompanyIDFromApplication(ctx context.Context, jobApplicationID uuid.UUID, userID uuid.UUID) error
+		GetJobApplicationByID(ctx context.Context, jobApplicationID uuid.UUID) (entities.JobApplication, error)
 	}
 	jobRepository struct {
 		db *gorm.DB
@@ -139,30 +140,22 @@ func (r *jobRepository) GetApplicants(ctx context.Context, jobID uuid.UUID) ([]e
 	return applicants, nil
 }
 
+func (r *jobRepository) GetJobApplicationByID(ctx context.Context, jobApplicationID uuid.UUID) (entities.JobApplication, error) {
+	var jobApplication entities.JobApplication
+	err := r.db.WithContext(ctx).Preload("Job.Company").Where("id = ?", jobApplicationID).First(&jobApplication).Error
+
+	if err != nil {
+		return entities.JobApplication{}, err
+	}
+
+	return jobApplication, nil
+}
+
 func (r *jobRepository) ChangeApplicationStatus(ctx context.Context, jobApplication entities.JobApplication) error {
 	res := r.db.WithContext(ctx).Model(&entities.JobApplication{}).Where("id = ?", jobApplication.ID).Updates(&jobApplication)
 
 	if res.Error != nil {
 		return res.Error
-	}
-
-	var newJobApplicationInfo entities.JobApplication
-	res = r.db.WithContext(ctx).Preload("Job.Company").Where("id = ?", jobApplication.ID).First(&newJobApplicationInfo)
-
-	if res.Error != nil {
-		return res.Error
-	}
-
-	notification := entities.Notification{
-		UserID:           newJobApplicationInfo.UserID,
-		Title:            "Job Application Status Updated",
-		Message:          "Your job application status for " + newJobApplicationInfo.Job.Title + " for " + newJobApplicationInfo.Job.Company.Name + " is updated to " + "'" + jobApplication.Status + "'",
-		IsRead:           false,
-		NotificationType: "Job Application",
-	}
-
-	if err := r.db.WithContext(ctx).Create(&notification).Error; err != nil {
-		return err
 	}
 
 	return nil

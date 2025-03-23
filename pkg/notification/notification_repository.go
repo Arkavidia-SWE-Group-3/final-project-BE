@@ -12,6 +12,7 @@ type (
 		GetNotification(ctx context.Context, userID string) ([]entities.Notification, error)
 		ReadNotification(ctx context.Context, notificationID string) error
 		GetNotificationByID(ctx context.Context, notificationID string) (entities.Notification, error)
+		CreateNotification(ctx context.Context, notification entities.Notification) error
 	}
 
 	notificationRepository struct {
@@ -55,4 +56,14 @@ func (r *notificationRepository) GetNotificationByID(ctx context.Context, notifi
 	}
 
 	return notification, nil
+}
+
+func (r *notificationRepository) CreateNotification(ctx context.Context, notification entities.Notification) error {
+	err := r.db.WithContext(ctx).Create(&notification).Error
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

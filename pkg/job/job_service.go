@@ -6,6 +6,7 @@ import (
 	"Go-Starter-Template/internal/utils"
 	"Go-Starter-Template/internal/utils/storage"
 	jwtService "Go-Starter-Template/pkg/jwt"
+	"Go-Starter-Template/pkg/notification"
 	"context"
 
 	"github.com/google/uuid"
@@ -21,14 +22,15 @@ type (
 	}
 
 	jobService struct {
-		jobRepository JobRepository
-		awsS3         storage.AwsS3
-		jwtService    jwtService.JWTService
+		jobRepository          JobRepository
+		notificationRepository notification.NotificationRepository
+		awsS3                  storage.AwsS3
+		jwtService             jwtService.JWTService
 	}
 )
 
-func NewJobService(jobRepository JobRepository, awsS3 storage.AwsS3, jwtService jwtService.JWTService) JobService {
-	return &jobService{jobRepository: jobRepository, awsS3: awsS3, jwtService: jwtService}
+func NewJobService(jobRepository JobRepository, notificationRepository notification.NotificationRepository, awsS3 storage.AwsS3, jwtService jwtService.JWTService) JobService {
+	return &jobService{jobRepository: jobRepository, notificationRepository: notificationRepository, awsS3: awsS3, jwtService: jwtService}
 }
 
 func (s *jobService) GetJobDetail(ctx context.Context, id string) (domain.JobDetailResponse, error) {
@@ -257,6 +259,26 @@ func (s *jobService) ChangeApplicationStatus(ctx context.Context, req domain.Job
 	}
 
 	err = s.jobRepository.ChangeApplicationStatus(ctx, jobApplication)
+
+	if err != nil {
+		return err
+	}
+
+	newJobApplicationInfo, err := s.jobRepository.GetJobApplicationByID(ctx, parsedApplicationID)
+
+	if err != nil {
+		return err
+	}
+
+	notification := entities.Notification{
+		UserID:           parsedUserID,
+		Title:            "Job Application Status Updated",
+		Message:          "Your job application status for " + newJobApplicationInfo.Job.Title + " for " + newJobApplicationInfo.Job.Company.Name + " is updated to " + "'" + jobApplication.Status + "'",
+		IsRead:           false,
+		NotificationType: "Job Application",
+	}
+
+	err = s.notificationRepository.CreateNotification(ctx, notification)
 
 	if err != nil {
 		return err
