@@ -54,6 +54,12 @@ func (s *userService) RegisterUser(ctx context.Context, req domain.UserRegisterR
 		return domain.UserRegisterResponse{}, err
 	}
 
+	validated := utils.ValidatePassword(req.Password)
+
+	if !validated {
+		return domain.UserRegisterResponse{}, domain.ErrPasswordNotValid
+	}
+
 	var profilePicture, headline string
 	userID := uuid.New()
 	allowedMimetype := []string{"image/jpeg", "image/png"}

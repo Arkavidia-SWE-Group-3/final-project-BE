@@ -94,6 +94,12 @@ func (s *companyService) RegisterCompany(ctx context.Context, req domain.Company
 		return err
 	}
 
+	validated := utils.ValidatePassword(req.Password)
+
+	if !validated {
+		return domain.ErrPasswordNotValid
+	}
+
 	company := entities.Companies{
 		Name:     req.Name,
 		Slug:     utils.CreateSlug(req.Name),

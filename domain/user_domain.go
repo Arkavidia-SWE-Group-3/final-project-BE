@@ -54,6 +54,7 @@ var (
 	ErrGetProfile             = errors.New("get profile failed")
 	ErrSearchUser             = errors.New("search user failed")
 	ErrGetSkills              = errors.New("get skills failed")
+	ErrPasswordNotValid       = errors.New("password not valid")
 )
 
 type (
