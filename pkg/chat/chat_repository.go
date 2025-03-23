@@ -64,42 +64,6 @@ func (r *chatRepository) CreateMessage(ctx context.Context, message entities.Cha
 		return err
 	}
 
-	chatRoom, err := r.GetChatRoomByRoomID(ctx, message.RoomID)
-
-	if err != nil {
-		return err
-	}
-	var targetUser entities.User
-
-	var senderUser entities.User
-
-	if message.UserID == chatRoom.FirstUserID {
-		targetUser = *chatRoom.SecondUser
-		senderUser = *chatRoom.FirstUser
-	} else {
-		targetUser = *chatRoom.FirstUser
-		senderUser = *chatRoom.SecondUser
-	}
-
-	notification := entities.Notification{
-		UserID:           targetUser.ID,
-		Message:          message.Message,
-		Title:            "New Message from " + senderUser.Name,
-		IsRead:           false,
-		NotificationType: "Message",
-	}
-
-	var existingNotification entities.Notification
-	if err := r.db.WithContext(ctx).Where("user_id = ? AND title = ? AND DATE(created_at) = DATE(?)", targetUser.ID, notification.Title, gorm.Expr("NOW()")).First(&existingNotification).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			if err := r.db.WithContext(ctx).Create(&notification).Error; err != nil {
-				return err
-			}
-		} else {
-			return nil
-		}
-	}
-
 	return nil
 }
 

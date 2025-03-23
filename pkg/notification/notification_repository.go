@@ -4,6 +4,7 @@ import (
 	"Go-Starter-Template/entities"
 	"context"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -13,6 +14,7 @@ type (
 		ReadNotification(ctx context.Context, notificationID string) error
 		GetNotificationByID(ctx context.Context, notificationID string) (entities.Notification, error)
 		CreateNotification(ctx context.Context, notification entities.Notification) error
+		CheckIfSameTitleAndDateExist(ctx context.Context, userID uuid.UUID, title string) (bool, error)
 	}
 
 	notificationRepository struct {
@@ -66,4 +68,15 @@ func (r *notificationRepository) CreateNotification(ctx context.Context, notific
 	}
 
 	return nil
+}
+
+func (r *notificationRepository) CheckIfSameTitleAndDateExist(ctx context.Context, userID uuid.UUID, title string) (bool, error) {
+	var existingNotification entities.Notification
+	if err := r.db.WithContext(ctx).Where("user_id = ? AND title = ? AND DATE(created_at) = DATE(?)", userID, title, gorm.Expr("NOW()")).First(&existingNotification).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return false, nil
+		}
+		return true, err
+	}
+	return true, nil
 }

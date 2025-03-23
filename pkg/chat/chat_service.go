@@ -4,6 +4,7 @@ import (
 	"Go-Starter-Template/domain"
 	"Go-Starter-Template/entities"
 	jwtService "Go-Starter-Template/pkg/jwt"
+	"Go-Starter-Template/pkg/notification"
 	"context"
 
 	"github.com/google/uuid"
@@ -18,13 +19,14 @@ type (
 	}
 
 	chatService struct {
-		chatRepository ChatRepository
-		jwtService     jwtService.JWTService
+		chatRepository         ChatRepository
+		notificationRepository notification.NotificationRepository
+		jwtService             jwtService.JWTService
 	}
 )
 
-func NewChatService(chatRepository ChatRepository, jwtService jwtService.JWTService) ChatService {
-	return &chatService{chatRepository: chatRepository, jwtService: jwtService}
+func NewChatService(chatRepository ChatRepository, notificationRepository notification.NotificationRepository, jwtService jwtService.JWTService) ChatService {
+	return &chatService{chatRepository: chatRepository, notificationRepository: notificationRepository, jwtService: jwtService}
 }
 
 func (s *chatService) GetChatRooms(ctx context.Context, userID string) ([]domain.ChatRoomsResponse, error) {
@@ -119,7 +121,7 @@ func (s *chatService) SendMessage(ctx context.Context, req domain.CreateMessageR
 
 	exist, err := s.chatRepository.CheckUserExistInChatRoom(ctx, parsedChatRoomID, parsedUserID)
 
-	if exist == false {
+	if !exist || err != nil {
 		return domain.ErrUserNotExistInChatRoom
 	}
 
@@ -131,6 +133,41 @@ func (s *chatService) SendMessage(ctx context.Context, req domain.CreateMessageR
 
 	if err != nil {
 		return domain.ErrFailedCreateMessage
+	}
+
+	chatRoom, err := s.chatRepository.GetChatRoomByRoomID(ctx, parsedChatRoomID)
+
+	if err != nil {
+		return err
+	}
+	var targetUser entities.User
+
+	var senderUser entities.User
+
+	if parsedUserID == chatRoom.FirstUserID {
+		targetUser = *chatRoom.SecondUser
+		senderUser = *chatRoom.FirstUser
+	} else {
+		targetUser = *chatRoom.FirstUser
+		senderUser = *chatRoom.SecondUser
+	}
+
+	exist, err = s.notificationRepository.CheckIfSameTitleAndDateExist(ctx, targetUser.ID, "New Message from "+senderUser.Name)
+
+	if exist || err != nil {
+		return nil
+	}
+
+	err = s.notificationRepository.CreateNotification(ctx, entities.Notification{
+		UserID:           targetUser.ID,
+		Message:          req.Message,
+		Title:            "New Message from " + senderUser.Name,
+		IsRead:           false,
+		NotificationType: "Message",
+	})
+
+	if err != nil {
+		return err
 	}
 
 	return nil
